@@ -273,18 +273,32 @@ function protectedFooter(){return "<div class='protected-footer' aria-label='Pie
 var MTO="";try{MTO=localStorage.getItem("seg_sismo_mto")||""}catch(e){}
 function secs(r){var o=[];S.forEach(function(s){var it=[];s.q.forEach(function(q){var v;if(q.y=="counts"){var p=[];q.o.forEach(function(x,i){var n=+r[q.k+"__"+i];if(n>0)p.push(x+": "+n)});v=p.join("; ")}else{v=r[q.k];if(Array.isArray(v))v=v.join(", ")}if(v!==undefined&&v!==null&&String(v).trim()!=="")it.push([q.n+". "+q.l,String(v)])});if(it.length)o.push({t:s.t,i:it})});return o}
 function rgb(h){var n=parseInt((h||"#3b6cf6").slice(1),16);return [n>>16&255,n>>8&255,n&255]}
+function svgPng(svg){
+return new Promise(function(resolve){
+var blob=new Blob([svg],{type:"image/svg+xml;charset=utf-8"}),url=URL.createObjectURL(blob),im=new Image();
+im.onload=function(){try{var w=1600,h=Math.max(600,Math.round(1600*im.height/im.width)),cv=document.createElement("canvas");cv.width=w;cv.height=h;var x=cv.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);resolve(cv.toDataURL("image/png"))}catch(e){resolve(null)}URL.revokeObjectURL(url)};
+im.onerror=function(){URL.revokeObjectURL(url);resolve(null)};im.src=url
+})
+}
 function pdfOf(r,cb){
 if(!window.jspdf&&cb){cb(null);return}
 if(!window.jspdf){msg="No se pudo cargar el generador de PDF. Conecte el dispositivo a internet e intente de nuevo.";render();return}
 var D=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),m=15,tw=180,y=m,c=rgb(T.ac);
-function chk(h){if(y+h>285){D.addPage();y=m}}
-function wr(txt,x,w,f,sz,col,lh){D.setFont("helvetica",f);D.setFontSize(sz);D.setTextColor(col[0],col[1],col[2]);D.splitTextToSize(txt,w).forEach(function(l){chk(lh);D.text(l,x,y);y+=lh})}
+function chk(h){if(y+h>265){D.addPage();y=m}}
+function wr(txt,x,w,f,sz,col,lh){D.setFont("helvetica",f);D.setFontSize(sz);D.setTextColor(col[0],col[1],col[2]);D.splitTextToSize(String(txt==null?"":txt),w).forEach(function(l){chk(lh);D.text(l,x,y);y+=lh})}
 wr(T.title||DT,m,tw,"bold",14,c,6.5);y+=2;
 wr("Fecha: "+(r.fecha||"")+"   Municipio: "+(r.mun||""),m,tw,"normal",9,[90,100,115],5);y+=3;
 secs(r).forEach(function(s){chk(14);y+=2;D.setDrawColor(c[0],c[1],c[2]);D.setLineWidth(.5);D.line(m,y,m+tw,y);y+=5;wr(s.t,m,tw,"bold",11.5,c,5.5);y+=1;s.i.forEach(function(x){wr(x[0],m,tw,"bold",9,[40,50,60],4.4);wr(x[1],m+4,tw-4,"normal",10,[20,25,30],4.8);y+=1.6})});
-y+=4;ftList().forEach(function(f){var w=tw,ih=w*f.r;if(ih>110){ih=110;w=ih/f.r}chk(ih+6);try{D.addImage(f.d,"JPEG",m+(tw-w)/2,y,w,ih)}catch(e){}y+=ih+4});
+return svgPng(allChart(true)).then(function(graph){
+if(graph){
+D.addPage();y=m;wr("Gráfica consolidada de resultados",m,tw,"bold",14,c,7);y+=4;
+try{var props=D.getImageProperties(graph),gh=Math.min(205,tw*props.height/props.width);D.addImage(graph,"PNG",m,y,tw,gh)}catch(e){wr("No fue posible insertar la gráfica en esta descarga.",m,tw,"normal",9,[90,90,90],5)}
+}
+y+=5;ftList().forEach(function(f){var w=tw,ih=w*f.r;if(ih>110){ih=110;w=ih/f.r}chk(ih+6);try{D.addImage(f.d,"JPEG",m+(tw-w)/2,y,w,ih)}catch(e){}y+=ih+4});
 for(var pi=1;pi<=D.getNumberOfPages();pi++){D.setPage(pi);try{D.addImage(FIMG,"JPEG",145,270,50,32)}catch(e){}}
-var nm="encuesta_"+String(r.doc||r.nombre||"hogar").replace(/[^A-Za-z0-9_-]+/g,"_")+".pdf",bl=D.output("blob");if(cb)cb(bl,nm);else save2(nm,bl,"application/pdf")}
+var nm="encuesta_"+String(r.doc||r.nombre||"hogar").replace(/[^A-Za-z0-9_-]+/g,"_")+".pdf",bl=D.output("blob");if(cb)cb(bl,nm);else save2(nm,bl,"application/pdf")
+})
+}
 function mailDlg(r){
 var b="Buen día,\n\nAdjunto en PDF la encuesta de seguimiento del hogar de "+(r.nombre||"(sin nombre)")+".\n\nCordial saludo.",su="Encuesta de seguimiento - "+(r.nombre||"hogar"),o=document.createElement("div");o.className="cropm";
 o.innerHTML="<div class='card' style='width:100%;max-width:560px;max-height:92vh;overflow:auto;margin:0'><h2 class='st'>Enviar por correo</h2><p class='mu'>El correo va con la encuesta en PDF. Esta página no tiene servidor de correo: en celular el PDF queda adjunto desde el menú de compartir; en computador se descarga el PDF y se abre el borrador para que lo adjunte.</p><div class='q'><span class='lb'>Para</span><input type='text' id='mdTo' inputmode='email' placeholder='correo@ejemplo.com' value='"+esc(MTO)+"'></div><div class='q'><span class='lb'>Asunto</span><input type='text' id='mdSu' value='"+esc(su)+"'></div><div class='q'><span class='lb'>Mensaje</span><textarea id='mdBo' style='min-height:150px'>"+esc(b)+"</textarea></div><div class='acts' style='flex-direction:column;align-items:stretch'><button id='mdS'>Enviar por correo como PDF</button><a class='lnk' id='mdG' target='_blank' rel='noopener'>Abrir en Gmail</a><a class='lnk' id='mdO' target='_blank' rel='noopener'>Abrir en Outlook web</a><a class='lnk' id='mdM' target='_blank' rel='noopener'>Abrir en mi app de correo</a><button class='sec' id='mdP'>Descargar el PDF para adjuntarlo</button><button class='sec' id='mdC'>Copiar el mensaje</button><button class='sec' id='mdX'>Cerrar</button></div><p class='mu' id='mdN'>Al abrir Gmail, Outlook o su app de correo también se descarga el PDF para que lo adjunte. Si un botón no abre nada, el navegador puede estar bloqueando ventanas emergentes en esta vista: copie el mensaje o abra el archivo directamente en su navegador.</p></div>";
