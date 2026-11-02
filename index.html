@@ -314,21 +314,30 @@ if(a>.2)s+=tsp(lx.toFixed(1),(ly+4).toFixed(1),[fmtv(c,sum,cfg.val)],"middle",13
 var ox=cx+(r+14)*Math.cos(mid),oy=cy+(r+14)*Math.sin(mid);
 s+=tsp(ox.toFixed(1),(oy+4).toFixed(1),wrapT(labels[i]+(a>.2?"":" ("+fmtv(c,sum,cfg.val)+")"),18),Math.cos(mid)>=0?"start":"end",12,tx,14)});
 return s+"</svg>"}
-function allChart(lit){var W=640,gap=24,y=0,b="",ln=lit?"#ccc":"var(--ln)",ps=[],
-pc=function(o){return {pal:o.pal||0,val:o.val||"pct",t:o.t=="donut"?"donut":"pie"}},base=pc(CH[0]||{}),
+function allChart(lit){
+var W=640,cols=PAL[(CH[0]&&CH[0].pal)||0][1],tx=lit?"#333":"var(--tx)",mu=lit?"#666":"var(--mu)",ln=lit?"#ddd":"var(--ln)",
 sm=MUNS.map(function(m){return list.filter(function(r){return r.orig===m}).length}),
-sp=POP.reduce(function(a,b){return a+b},0),ss=sm.reduce(function(a,b){return a+b},0);
-ps.push(pieP("Gráfica 1a: Población total por municipio (familias afectadas)","Población n="+sp,MUNS,POP,base,lit));
-ps.push(pieP("Gráfica 1b: Muestra encuestada por municipio","Muestra n="+ss,MUNS,sm,base,lit));
-CH.forEach(function(c,i){var ks=cfgKeys(c),cf=pc(c),add=0;
-ks.forEach(function(k,j){var q=QK(k);if(!q)return;
-var g=chartGen(Object.assign({},c,cf,{v:k,title:ks.length>1?"Gráfica "+(i+3)+"."+(j+1)+": "+q.l:c.title}),i,lit);
-if(g.n>0||ks.length==1||(j==ks.length-1&&!add)){ps.push(g.svg);add++}})});
-ps.forEach(function(sv,k){var h=400;if(k){b+="<line x1='16' x2='"+(W-16)+"' y1='"+(y+gap/2)+"' y2='"+(y+gap/2)+"' style='stroke:"+ln+"'/>";y+=gap}
-b+=sv.replace(/^<svg[^>]*>/,"<svg x='0' y='"+y+"' width='"+W+"' height='"+h+"' viewBox='0 0 "+W+" "+h+"'>");y+=h});
-return "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 "+W+" "+y+"' "+(lit?"width='"+W+"' height='"+y+"'":"width='100%'")+" role='img' aria-label='Gráfica única del seguimiento' style='max-width:100%;height:auto;font-family:"+(lit?"Arial,sans-serif":"inherit")+"'>"+(lit?"<rect width='"+W+"' height='"+y+"' fill='#fff'/>":"")+b+"</svg>"}
+sp=POP.reduce(function(a,b){return a+b},0),ss=sm.reduce(function(a,b){return a+b},0),items=[];
+/* Una sola serie de segmentos: cada segmento conserva el nombre de su pregunta y opción. */
+MUNS.forEach(function(m,i){if((+POP[i]||0)>0)items.push({label:"Población · "+m,value:+POP[i],group:"Población"})});
+var keys=chQs().map(function(q){return q.k});
+keys.forEach(function(k){var q=QK(k);if(!q||q.y==="text"||q.y==="date"||q.y==="area"||q.y==="counts")return;
+var rs=list.filter(function(r){var v=r[q.k];return Array.isArray(v)?v.length>0:!!v}),n=rs.length;if(!n)return;
+q.o.forEach(function(o){var c=rs.filter(function(r){var v=r[q.k];return Array.isArray(v)?v.indexOf(o)>-1:v===o}).length;if(c)items.push({label:q.n+". "+q.l+" · "+o,value:c,group:q.n+". "+q.l})})
+});
+var H=Math.max(440,250+Math.max(1,items.length)*22),cx=220,cy=H/2,r=150,ri=88,sum=items.reduce(function(a,x){return a+x.value},0),ang=-Math.PI/2,b="";
+if(sum){items.forEach(function(it,i){var a=it.value/sum*2*Math.PI,a0=ang,a1=ang+a,mid=(a0+a1)/2,lg=a>Math.PI?1:0,P=function(rr,t){return (cx+rr*Math.cos(t)).toFixed(2)+" "+(cy+rr*Math.sin(t)).toFixed(2)},d;
+if(items.length===1)d="M"+P(r,0)+" A"+r+" "+r+" 0 1 1 "+P(r,Math.PI)+" A"+r+" "+r+" 0 1 1 "+P(r,0)+"Z M"+P(ri,0)+" A"+ri+" "+ri+" 0 1 1 "+P(ri,Math.PI)+" A"+ri+" "+ri+" 0 1 1 "+P(ri,0)+"Z";
+else d="M"+P(r,a0)+" A"+r+" "+r+" 0 "+lg+" 1 "+P(r,a1)+" L"+P(ri,a1)+" A"+ri+" "+ri+" 0 "+lg+" 0 "+P(ri,a0)+"Z";
+var col=cols[i%cols.length];b+="<path d='"+d+"' fill='"+col+"' fill-rule='evenodd' stroke='"+(lit?"#fff":"var(--sf)")+"' stroke-width='1.5'><title>"+esc(it.label)+": "+it.value+" ("+pct(it.value,sum)+")</title></path>";ang=a1;
+})}
+var legendX=405,y=36;b+=tsp(cx,cy-12,["Hogares encuestados"],"middle",12,mu,15,600)+tsp(cx,cy+13,[String(ss)],"middle",25,tx,28,700)+tsp(cx,cy+36,["Población: "+sp],"middle",11,mu,14);
+items.forEach(function(it,i){var yy=y+i*22,col=cols[i%cols.length];b+="<rect x='"+legendX+"' y='"+(yy-10)+"' width='11' height='11' rx='2' fill='"+col+"'/>"+tsp(legendX+18,yy,[it.label.length>32?it.label.slice(0,29)+"…":it.label],"start",10,tx,12)+tsp(625,yy,[String(it.value)],"end",10,mu,12)});
+if(!items.length)b=tsp(W/2,H/2,["Aún no hay datos suficientes para graficar."],"middle",13,mu,16);
+return "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 "+W+" "+H+"' "+(lit?"width='"+W+"' height='"+H+"'":"width='100%'")+" role='img' aria-label='Una gráfica de anillo con población y respuestas de la encuesta' style='max-width:100%;height:auto;font-family:"+(lit?"Arial,sans-serif":"inherit")+"'>"+(lit?"<rect width='100%' height='100%' fill='#fff'/>":"")+b+"</svg>"
+}
 function refreshAll(){var d=document.getElementById("chart");if(d)d.innerHTML=allChart()}
-function chartsCard(){return "<div class='card dp'><h2>Gráfica del seguimiento</h2><p class='mu'>Todo en una sola gráfica circular: población, muestra y las preguntas elegidas. Se actualiza con cada encuesta guardada.</p><div id='chart'>"+allChart()+"</div><div class='acts' style='margin-top:12px'><button id='chpngall'>Descargar imagen</button><button class='sec' id='chadd'>Agregar otra gráfica a esta</button></div><details style='margin-top:14px'><summary><b>Editar población total (familias afectadas)</b></summary>"+MUNS.map(function(m,i){return "<label class='cnt'><span>"+m+"</span><input type='number' min='0' inputmode='numeric' data-pop='"+i+"' value='"+POP[i]+"' aria-label='Población de "+m+"'></label>"}).join("")+"</details>"+CH.map(chCard).join("")+"</div>"}
+function chartsCard(){return "<div class='card dp'><h2>Gráfica del seguimiento</h2><p class='mu'>Una sola gráfica de anillo reúne la población por municipio y las respuestas de las preguntas seleccionadas. El centro muestra los hogares encuestados y la población total.</p><div id='chart'>"+allChart()+"</div><div class='acts' style='margin-top:12px'><button id='chpngall'>Descargar imagen</button><button class='sec' id='chadd'>Agregar otra gráfica a esta</button></div><details style='margin-top:14px'><summary><b>Editar población total (familias afectadas)</b></summary>"+MUNS.map(function(m,i){return "<label class='cnt'><span>"+m+"</span><input type='number' min='0' inputmode='numeric' data-pop='"+i+"' value='"+POP[i]+"' aria-label='Población de "+m+"'></label>"}).join("")+"</details>"+CH.map(chCard).join("")+"</div>"}
 document.addEventListener("input",function(e){var i=e.target.dataset.pop;if(i===undefined)return;POP[+i]=Math.max(0,+e.target.value||0);try{localStorage.setItem("seg_sismo_pop",JSON.stringify(POP))}catch(x){}refreshAll()});
 var PAL=[["Estándar",["#f4a261","#e9c46a","#264653","#2a9d8f","#e76f51","#8ab17d","#6d597a","#b56576"]],["Azules y verdes",["#2f86ab","#2a9d8f","#7fb7be","#1d4e6b","#8ab17d","#4a6fa5","#a8dadc","#457b9d"]],["Vivos",["#3b6cf6","#f6ae2d","#e63946","#2a9d8f","#9b5de5","#f15bb5","#00bbf9","#8ac926"]],["Suaves",["#ffadad","#ffd6a5","#fdffb6","#caffbf","#9bf6ff","#a0c4ff","#bdb2ff","#ffc6ff"]]];
 var CH=[{v:"segsoc",t:"pie",pal:0,val:"pct",title:"Gráfica 3: Seguridad social en el trabajo tras el desplazamiento"}];
@@ -445,14 +454,18 @@ return h+"</div>"}
 function render(){
 var m=document.getElementById("app"),h="";
 if(view=="cover"){m.innerHTML=(banner?"<div class='bn' style='height:"+BC.h+"px'><img src='"+banner+"' alt='Banner' style='"+isty()+"'></div>":"<div class='strip'></div>")+"<div class='cvr'><h1>"+esc(T.title||DT)+"</h1><p>"+esc(T.desc||DD)+"</p><button id='start'>Comenzar</button><button class='sec' id='cvb'>Volver</button></div>";return}
+if(view=="preview"){
+h+=hero("Vista previa de la encuesta. Así la verá la persona que responde.");
+S.forEach(function(sx){h+="<div class='card'><h2 class='st'>"+esc(sx.t)+"</h2>";sx.q.forEach(function(q){if(!show(q))return;h+="<div class='q'><span class='lb'>"+q.n+". "+esc(q.l)+(q.r?" *":"")+"</span>"+(q.h?"<div class='mu'>"+esc(q.h)+"</div>":"");if(q.y=="radio"||q.y=="multi")h+="<div class='opts'>"+q.o.map(function(o){return "<span class='opt'>"+esc(o)+"</span>"}).join("")+"</div>";else if(q.y=="counts")h+=q.o.map(function(o){return "<div class='cnt'>"+esc(o)+" <span class='mu'>Cantidad</span></div>"}).join("");else h+="<div class='mu' style='border:1px solid var(--ln);border-radius:6px;padding:10px'>"+(q.y=="area"?"Escriba su respuesta aquí":"Respuesta")+"</div>";h+="</div>"});h+="</div>"});
+h+="<div class='acts'><button class='sec' id='homeback'>Volver</button><button id='gotoconfig'>Ir a configuración</button><button class='sec' id='share'>Ir a compartir</button></div>";m.innerHTML=h;return}
 if(view=="report"){m.innerHTML=hero("Informe de metodología generado con las encuestas")+"<div class='acts'><button id='rbk' class='sec'>Volver</button><button id='rdl'>Descargar</button><button id='rcp' class='sec'>Copiar texto</button></div>"+(msg?"<p class='msg'>"+esc(msg)+"</p>":"")+"<div class='card rp'>"+reporte()+"</div>";return}
 if(view=="home"){
 h+=hero("Encuesta a hogares afectados por el sismo de 2025. Meta y Yopal.");
-h+="<div class='acts'><button id='new'>Nueva encuesta</button><button class='sec' id='tdsg'>Personalizar diseño</button><button class='sec' id='bpick'>"+(banner?"Cambiar banner":"Agregar banner")+"</button><input type='file' id='bf' accept='image/*' hidden>"+(banner?"<button class='sec' id='badj'>Ajustar banner</button><button class='sec' id='bcrop'>Recortar banner</button><button class='sec' id='brm'>Quitar banner</button>":"")+(list.length?"<button class='sec' id='exp'>Exportar CSV</button><button class='sec' id='rep'>Generar metodología</button>":"")+"</div>";
+h+="<div class='acts'><button id='new'>Nueva encuesta</button><button class='sec' id='preview'>Vista previa</button><button class='sec' id='tdsg'>Ir a configuración</button><button class='sec' id='share'>Ir a compartir</button><button class='sec' id='bpick'>"+(banner?"Cambiar banner":"Agregar banner")+"</button><input type='file' id='bf' accept='image/*' hidden>"+(banner?"<button class='sec' id='badj'>Ajustar banner</button><button class='sec' id='bcrop'>Recortar banner</button><button class='sec' id='brm'>Quitar banner</button>":"")+(list.length?"<button class='sec' id='exp'>Exportar CSV</button><button class='sec' id='rep'>Generar metodología</button>":"")+"</div>";
 if(msg)h+="<p class='msg' role='alert'>"+esc(msg)+"</p>";if(adj&&banner)h+=panel();if(dsg)h+=dpanel2();
-h+=chartsCard();h+="<div class='card'><h2>Encuestas guardadas: "+list.length+"</h2>";
+h+="<div class='card'><h2>Encuestas guardadas: "+list.length+"</h2>";
 list.slice().reverse().forEach(function(r,i){var ix=list.length-1-i;h+="<div class='row'><div><strong>"+esc(r.nombre||"Sin nombre")+"</strong><div class='mu'>"+esc(r.doc||"")+" · "+esc(r.mun||"")+" · "+esc(r.fecha||"")+"</div></div><span class='ra'><button class='sec sm' data-pdf='"+ix+"'>PDF</button><button class='sec sm' data-mail='"+ix+"'>Correo</button><button class='del' data-del='"+ix+"'>Borrar</button></span></div>"});
-h+="</div>"+ft();m.innerHTML=h;return}
+h+="</div>";if(list.length)h+=chartsCard();h+=ft();m.innerHTML=h;return}
 if(UN())step=0;var s=S[step],pc=UN()?100:Math.round((step+1)/S.length*100);
 h+=hero("Encuesta a hogares afectados por el sismo de 2025. Sus respuestas orientan la acción de las alcaldías de Meta y Yopal. Las preguntas con * son obligatorias.")+"<div class='prog'><div class='bar' role='progressbar' aria-valuenow='"+pc+"' aria-valuemin='0' aria-valuemax='100'><i style='width:"+pc+"%'></i></div><span>"+(UN()?"Una sola página":"Página "+(step+1)+"/"+S.length)+"</span></div><div class='card'><h2 class='st'>"+s.t+"</h2>";
 if(UN()){S.forEach(function(sx,i){if(i)h+="</div><div class='card'><h2 class='st'>"+sx.t+"</h2>";sx.q.forEach(function(q){if(show(q))h+=field(q)})})}else s.q.forEach(function(q){if(show(q))h+=field(q)});
@@ -472,6 +485,10 @@ if(t.dataset.m){var k=t.dataset.m,l=a[k]||[];a[k]=t.checked?l.concat(t.value):l.
 else if(t.type=="radio"){a[t.dataset.k]=t.value;S.forEach(function(sx){sx.q.forEach(function(q){if(q.f&&q.f[0]==t.dataset.k&&q.f[1]!==t.value){delete a[q.k]}})});var y=window.scrollY;render();window.scrollTo(0,y)}});
 document.addEventListener("click",function(ev){var t=ev.target.closest("button");if(!t)return;
 if(t.id=="new"){a={fecha:new Date().toISOString().slice(0,10)};step=0;view=T.cover?"cover":"form";msg="";render()}
+else if(t.id=="preview"){view="preview";render();window.scrollTo(0,0)}
+else if(t.id=="homeback"||t.id=="cvb"){view="home";render()}
+else if(t.id=="gotoconfig"||t.id=="tdsg"){view="home";dsg=1;dtab="c";render();window.scrollTo(0,0)}
+else if(t.id=="share"){var u=location.href;var shareData={title:T.title||DT,text:"Completa la encuesta de seguimiento a hogares reasentados.",url:u};if(navigator.share){navigator.share(shareData).catch(function(){})}else if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).then(function(){msg="Enlace copiado. Publícalo en un sitio web para que otras personas puedan abrir la encuesta.";render()},function(){msg="No se pudo copiar el enlace. Copia la dirección desde la barra del navegador.";render()})}else{msg="Copia la dirección desde la barra del navegador para compartir la encuesta.";render()}}
 else if(t.id=="prev"){msg="";if(step)step--;else view="home";render()}
 else if(t.id=="next"){msg="";if(!UN()&&step<S.length-1){step++;render();return}
 var mi=missing();if(mi){step=UN()?0:mi.s;msg="Falta un dato obligatorio: "+mi.l;render();return}
@@ -488,7 +505,6 @@ else if(t.dataset.chdel!==undefined){CH.splice(+t.dataset.chdel,1);saveCH();rend
 else if(t.id=="chadd"){CH.push({v:"estado",t:"bar",pal:1,val:"pct",title:""});saveCH();render()}
 else if(t.dataset.pdf){pdfOf(list[+t.dataset.pdf])}
 else if(t.dataset.mail){mailDlg(list[+t.dataset.mail])}
-else if(t.id=="tdsg"){dsg=1;dtab="c";render()}
 else if(t.id=="tsave"){dsg=0;render()}
 else if(t.id=="tabc"){dtab="c";render()}
 else if(t.id=="tabt"){dtab="t";render()}
