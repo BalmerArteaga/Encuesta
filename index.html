@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seguimiento a comunidades reasentadas</title>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#f3f5f7;--sf:#fff;--tx:#18222d;--mu:#5b6876;--ln:#d5dbe2;--ac:#1d4e6b;--ac2:#e3a008;--ok:#2f7d4f;--er:#b3261e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10171e;--sf:#18222d;--tx:#e8edf2;--mu:#9aa7b5;--ln:#2d3a47;--ac:#7fbbd9;--ac2:#f0b429;--ok:#6cc08b;--er:#f2827b}}
+:root[data-theme="dark"]{--bg:#10171e;--sf:#18222d;--tx:#e8edf2;--mu:#9aa7b5;--ln:#2d3a47;--ac:#7fbbd9;--ac2:#f0b429;--ok:#6cc08b;--er:#f2827b}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 "Public Sans",system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px 16px 96px}
+h1{font-size:1.4rem;margin:8px 0 4px}h2{font-size:1.2rem;margin:0 0 4px}
+.mu{color:var(--mu);font-size:.9rem}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:16px;margin:12px 0}
+.q{margin:0 0 18px}.q>label,.q>.lb{display:block;font-weight:600;margin-bottom:6px}
+input[type=text],input[type=number],input[type=date],textarea{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--ln);border-radius:6px;padding:10px}
+textarea{min-height:90px}
+input:focus,textarea:focus,button:focus-visible,.opt:focus-within{outline:3px solid var(--ac2);outline-offset:1px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{display:flex;align-items:center;gap:8px;border:1px solid var(--ln);border-radius:6px;padding:10px 12px;background:var(--bg);cursor:pointer;min-height:44px}
+.opt:has(input:checked){border-color:var(--ac);background:color-mix(in srgb,var(--ac) 14%,var(--bg));font-weight:600}
+.opt input{accent-color:var(--ac);width:18px;height:18px}
+.cnt{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--ln)}
+.cnt input{width:80px}
+.bar{height:6px;background:var(--ln);border-radius:3px;overflow:hidden;margin:10px 0 4px}.bar i{display:block;height:100%;background:var(--ac)}
+button{font:inherit;border:1px solid var(--ac);background:var(--ac);color:var(--bg);border-radius:6px;padding:11px 18px;font-weight:600;cursor:pointer;min-height:44px}
+button.sec{background:transparent;color:var(--ac)}button.del{background:transparent;color:var(--er);border-color:var(--er);padding:6px 10px;min-height:0}
+.nav{position:fixed;left:0;right:0;bottom:0;background:var(--sf);border-top:1px solid var(--ln);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.nav div{max-width:640px;margin:auto;display:flex;gap:10px;justify-content:space-between}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ln)}
+.msg{color:var(--er);font-weight:600;margin:8px 0}.ok{color:var(--ok);font-weight:600}
+.acts{display:flex;gap:10px;flex-wrap:wrap}
+:root{--ac:#3b6cf6;--bg:#eef1f6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10171e}}
+main{max-width:760px;padding:0 0 110px}
+.hero{background:linear-gradient(135deg,#3b6cf6,#6a4df0);color:#fff;text-align:center;padding:36px 20px 52px}
+.hero h1{margin:0 0 8px;font-size:1.5rem}.hero p{margin:0 auto;max-width:560px;opacity:.92;font-size:.95rem}
+#app>.acts,#app>.msg{margin-left:16px;margin-right:16px}#app>.acts{margin-top:18px;position:static}
+button.sec{background:var(--sf)}
+.prog{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--sf);border-bottom:1px solid var(--ln);font-size:.85rem;color:var(--mu)}
+.prog .bar{flex:1;margin:0}.bar i{background:#3b6cf6}
+.card{margin:16px;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(30,50,90,.07)}
+h2.st{font-size:1.1rem;padding-left:10px;border-left:4px solid var(--ac);margin:0 0 20px}
+.no{color:var(--ac);margin-right:2px}
+.q{padding-bottom:18px;border-bottom:1px dashed var(--ln)}.q:last-child{border-bottom:0;margin-bottom:0}
+.opts{flex-direction:column;gap:8px}.opt{border-radius:8px;padding:12px 14px}.opt:hover{border-color:var(--ac)}
+.opt input{width:20px;height:20px}
+button{border-radius:999px;padding:11px 28px}.nav div{justify-content:center}.nav button{min-width:130px}
+.nav{box-shadow:0 -2px 10px rgba(30,50,90,.08)}
+button.del{border-radius:6px}
+.hero.has{background-size:cover;background-position:center;min-height:210px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.hero.has::before{content:"";position:absolute;inset:0;background:linear-gradient(transparent 25%,rgba(0,0,0,.65))}
+.hero.has>*{position:relative}
+/* >>> REEMPLACE PEGAR_AQUI_BASE64_FONDO por la cadena base64 original de su imagen de fondo (la que empieza en /9j/4AAQ... dentro de data:image/jpeg;base64,) <<< */
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:url('data:image/jpeg;base64,PEGAR_AQUI_BASE64_FONDO') center/cover no-repeat;opacity:.13;pointer-events:none}
+.card,.prog{background:color-mix(in srgb,var(--sf) 90%,transparent)}
+.bn img{display:block;width:100%;height:auto}
+.hero2{background:var(--sf);text-align:center;padding:14px 20px;border-bottom:1px solid var(--ln)}
+.hero2 h1{margin:0 0 4px;font-size:1.25rem}.hero2 p{margin:0 auto;max-width:560px;color:var(--mu);font-size:.9rem}
+#app>.hero2+.acts{margin-top:16px}
+.bn{position:relative;overflow:hidden;background:var(--sf)}
+.bn img{width:100%;height:100%;display:block;user-select:none}
+.bn.adj{cursor:grab;touch-action:none;outline:3px dashed var(--ac2);outline-offset:-3px}
+input[type=range]{width:100%;accent-color:var(--ac)}
+.cropm{position:fixed;inset:0;z-index:50;background:rgba(10,15,25,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
+.cropm .ct{color:#fff;margin:0;text-align:center;font-size:.9rem}
+.stage{position:relative;line-height:0;touch-action:none}
+.stage img{display:block;max-width:92vw;max-height:68vh;user-select:none}
+.cb{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.55);cursor:move;touch-action:none}
+.hd{position:absolute;width:22px;height:22px;background:#fff;border:2px solid #3b6cf6;border-radius:50%;margin:-11px 0 0 -11px}
+.hd[data-h=nw]{left:0;top:0;cursor:nwse-resize}.hd[data-h=n]{left:50%;top:0;cursor:ns-resize}.hd[data-h=ne]{left:100%;top:0;cursor:nesw-resize}.hd[data-h=e]{left:100%;top:50%;cursor:ew-resize}
+.hd[data-h=se]{left:100%;top:100%;cursor:nwse-resize}.hd[data-h=s]{left:50%;top:100%;cursor:ns-resize}.hd[data-h=sw]{left:0;top:100%;cursor:nesw-resize}.hd[data-h=w]{left:0;top:50%;cursor:ew-resize}
+.ca{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.cropm button.sec{background:#fff}
+.rp table{border-collapse:collapse;margin:6px 0;width:100%;font-size:.9rem}.rp td,.rp th{border:1px solid var(--ln);padding:6px 8px;text-align:left}.rp th{background:var(--bg)}
+.rp h2{font-size:1.25rem;margin:0 0 8px}.rp h3{font-size:1.05rem;margin:22px 0 6px;color:var(--ac)}.rp h4{font-size:.95rem;margin:16px 0 4px}.rp p,.rp li{font-size:.95rem}
+input[type=color]{width:60px;height:36px;padding:2px;border:1px solid var(--ln);border-radius:6px;background:var(--sf);cursor:pointer}
+.tabs{display:flex;background:var(--bg);border-radius:999px;padding:4px;margin-bottom:6px}.tabs button{flex:1;background:transparent;color:var(--tx);border:0;min-height:40px;padding:8px}.tabs button.on{background:var(--sf);color:var(--ac);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.dr{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--ln)}.dr b{font-weight:600}.dr small{display:block;color:var(--mu);font-weight:400}
+.tg{appearance:none;-webkit-appearance:none;width:44px;height:24px;border-radius:12px;background:var(--ln);position:relative;cursor:pointer;flex:none;margin:0}.tg::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}.tg:checked{background:var(--ac)}.tg:checked::after{left:22px}
+.dp select{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--ln);border-radius:999px;padding:9px 14px;max-width:60%}
+.sws{display:flex;justify-content:space-around;padding:14px 0}.sw{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.8rem;color:var(--mu)}
+.sw input{width:46px;height:46px;border-radius:50%;padding:0;border:2px solid var(--ln);background:none;-webkit-appearance:none;appearance:none}.sw input::-webkit-color-swatch-wrapper{padding:0}.sw input::-webkit-color-swatch{border:0;border-radius:50%}.sw input::-moz-color-swatch{border:0;border-radius:50%}
+.seg{display:flex;gap:6px}.seg button{padding:8px 12px;min-height:40px}.seg button:not(.on){background:transparent;color:var(--ac)}
+.big{width:100%;background:#93e08a;color:#14301a;border-color:#93e08a}
+.th{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ln)}.th i{display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid var(--ln);margin-right:4px;vertical-align:middle}
+.strip{height:72px;background:color-mix(in srgb,var(--ac) 30%,var(--sf))}
+.cvr{max-width:520px;margin:0 auto;padding:28px 22px}.cvr h1{color:var(--ac);text-align:center;font-size:1.6rem;line-height:1.3}.cvr p{line-height:1.8;margin:18px 0 24px}.cvr button{width:100%;margin-bottom:10px}
+.hero2 h1{color:var(--ac)}
+.ra{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.sm{padding:6px 14px;min-height:36px;font-size:.85rem}
+.lnk{display:block;text-align:center;border:1px solid var(--ac);background:var(--ac);color:#fff;border-radius:999px;padding:11px 18px;font-weight:600;text-decoration:none;min-height:44px}
+.ft{margin:8px 16px 0}.ft img{display:block;width:100%;height:auto;border-radius:10px}.ft img.one{display:block;width:100%;height:auto;border-radius:10px}
+.mq{overflow:hidden;border-radius:10px}
+.mq-t{display:flex;gap:10px;width:max-content;animation:mqs var(--d,30s) linear infinite}
+.mq:hover .mq-t,.mq:active .mq-t{animation-play-state:paused}
+.mq img{height:160px;object-fit:cover;flex:none;border-radius:10px;display:block}
+@keyframes mqs{to{transform:translateX(calc(-50% - 5px))}}
+@media (prefers-reduced-motion:reduce){.mq-t{animation:none;flex-wrap:wrap;width:auto}.mq-t .dup{display:none}}
+.cgrid{display:grid;gap:12px}.cg{border:1px solid var(--ln);border-radius:10px;padding:6px}
+.fch{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;margin-top:12px}
+.chip{position:relative;display:inline-block}.ft .chip img{width:52px;height:36px;object-fit:cover;border-radius:6px;display:block}
+.chip button{position:absolute;top:-8px;right:-8px;width:22px;height:22px;min-height:0;padding:0;border-radius:50%;font-size:14px;line-height:1;background:rgba(0,0,0,.72);border-color:transparent;color:#fff}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+var S=[
+{t:"Titular del hogar",q:[
+{k:"fecha",l:"Fecha",y:"date"},
+{k:"nombre",l:"Nombre completo",y:"text",r:1},
+{k:"doc",l:"Documento de identidad",y:"text",r:1},
+{k:"mun",l:"Municipio actual de reasentamiento",y:"radio",o:["Meta","Yopal"],r:1},
+{k:"orig",l:"Municipio afectado por el sismo (de origen)",y:"radio",o:["Paratebueno","Medina","Cabuyaro","Barranca de Upía"],r:1},
+{k:"ubic",l:"Ubicación exacta de la vivienda entregada",h:"Dirección, manzana, lote o vereda",y:"text"},
+{k:"estado",l:"Estado de la vivienda",y:"radio",o:["Destruida","Inhabitable","Afectación menor","Ninguna"]}]},
+{t:"Composición familiar",q:[
+{k:"total",l:"Número total de integrantes del hogar",y:"number"},
+{k:"dif",l:"Integrantes por grupo diferencial",h:"Deje en blanco si no hay",y:"counts",o:["Niños, niñas y adolescentes (0-17 años)","Personas adultas mayores (60+ años)","Personas con discapacidad o enfermedades crónicas","Mujeres cabeza de familia","Pertenencia étnica (indígena / afrodescendiente)","Personas gestantes o lactantes"]},
+{k:"habita",l:"¿Toda la familia registrada habita actualmente en la vivienda asignada?",y:"radio",o:["Sí","No"]},
+{k:"habita_m",l:"Motivo",y:"radio",o:["Migración","Retorno","Hacinamiento","Otro"],f:["habita","No"]},
+{k:"habita_o",l:"Especifique el motivo",y:"text",f:["habita_m","Otro"]}]},
+{t:"Reasentamiento y vivienda",q:[
+{k:"agua",l:"Agua potable",y:"radio",o:["Sí","No","Intermitente"]},
+{k:"luz",l:"Energía eléctrica",y:"radio",o:["Sí","No","Intermitente"]},
+{k:"gas",l:"Gas domiciliario",y:"radio",o:["Sí","No"]},
+{k:"net",l:"Internet",y:"radio",o:["Sí","No"]},
+{k:"conv",l:"¿Cómo evalúa la convivencia y adaptación con sus vecinos y la infraestructura comunitaria (escuelas, centros de salud)?",y:"radio",o:["Buena","Regular","Mala"]},
+{k:"barr",l:"¿Qué principales barreras de infraestructura o convivencia ha encontrado desde su traslado?",y:"area"}]},
+{t:"Medios de vida",q:[
+{k:"ant",l:"Principal medio de subsistencia antes del sismo de 2025",y:"radio",o:["Agricultura / Ganadería","Comercio informal","Empleo formal / Empleado","Oficios independientes / Servicios","Sin ocupación"]},
+{k:"act",l:"Fuente principal de ingresos en el nuevo territorio",y:"radio",o:["Agricultura / Ganadería","Comercio informal","Empleo formal / Empleado","Oficios independientes / Servicios","Sin ocupación"]},
+{k:"afect",l:"¿El traslado afectó negativamente su capacidad de generar ingresos?",y:"radio",o:["Sí, totalmente","Parcialmente","No, se mantuvo o mejoró"]},
+{k:"emp",l:"¿En qué área le gustaría desarrollar un emprendimiento o vinculación laboral sostenible?",y:"radio",o:["Agroindustria / Producción local","Comercio y servicios","Artesanías / Gastronomía","Reparaciones técnicas / Construcción","Otro"]},
+{k:"emp_o",l:"¿Cuál?",y:"text",f:["emp","Otro"]},
+{k:"form",l:"¿Qué formación requeriría la familia para sostener este medio de vida?",h:"Puede marcar varias",y:"multi",o:["Capacitación técnica / Tecnológica","Gestión de negocios / Finanzas","Educación formal para jóvenes y adultos","Alfabetización digital / Manejo de herramientas"]}]},
+{t:"Seguridad y salud",q:[
+{k:"salud",l:"¿Algún miembro del hogar presenta afectaciones de salud derivadas del sismo o del traslado?",y:"radio",o:["Sí","No"]},
+{k:"salud_t",l:"Tipo de afectación",y:"multi",o:["Afectación física / Lesión","Estrés postraumático / Ansiedad / Depresión"],f:["salud","Sí"]},
+{k:"sst",l:"En sus actividades de subsistencia o trabajo en el nuevo territorio, ¿cuenta con condiciones de protección laboral y seguridad ambiental?",y:"radio",o:["Sí","Parcialmente","No"]},
+{k:"segsoc",l:"Situación de seguridad social en el trabajo tras el desplazamiento",y:"radio",o:["Con ARL","Con salud subsidiada","Sin protección (informal)","Sin trabajo"]},
+{k:"riesgo",l:"¿El nuevo entorno residencial o laboral presenta riesgos de accidentes o amenazas naturales?",y:"radio",o:["Sí","No"]},
+{k:"riesgo_d",l:"Describa brevemente el riesgo observado",y:"area",f:["riesgo","Sí"]}]},
+{t:"Cierre",q:[
+{k:"acomp",l:"¿Ha recibido asistencia o seguimiento de la Alcaldía local u organizaciones tras su reasentamiento?",y:"radio",o:["Sí","No"]},
+{k:"prio1",l:"Primera acción prioritaria que solicitaría a la administración municipal",y:"area"},
+{k:"prio2",l:"Segunda acción prioritaria",y:"area"}]}
+];
+var N=0;S.forEach(function(s){s.q.forEach(function(q){q.n=++N})});
+var KEY="seg_sismo_v1",a={},step=0,view="home",list=[],msg="";
+var BK="seg_sismo_banner",banner="";try{banner=localStorage.getItem(BK)||""}catch(e){}
+function hero(p){var HT=esc(T.title||DT);if(T.desc&&view=="home")p=esc(T.desc);if(banner)return "<div class='bn"+(adj&&view=="home"?" adj":"")+"' style='height:"+BC.h+"px'><img src='"+banner+"' alt='Banner' draggable='false' style='"+isty()+"'></div><div class='hero2'><h1>"+HT+"</h1><p>"+p+"</p></div>";return "<div class='hero"+(banner?" has":"")+"'"+(banner?" style=\"background-image:url('"+banner+"')\"":"")+"><h1>"+HT+"</h1><p>"+p+"</p></div>"}
+function setBanner(f){if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var w=Math.min(1400,im.width),c=document.createElement("canvas");c.width=w;c.height=Math.round(im.height*w/im.width);c.getContext("2d").drawImage(im,0,0,c.width,c.height);banner=c.toDataURL("image/jpeg",.82);bannerO=banner;try{localStorage.setItem(BK+"_o",banner)}catch(e){}BC.x=50;BC.y=50;BC.z=100;bsave();msg="";try{localStorage.setItem(BK,banner)}catch(e){msg="No se pudo guardar el banner en este dispositivo."}render()};im.onerror=function(){msg="El archivo no es una imagen válida.";render()};im.src=r.result};r.readAsDataURL(f)}
+function dl(){var b=new Blob([csv()],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(b),x=document.createElement("a");x.href=u;x.download="seguimiento_sismo_"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(x);x.click();x.remove();setTimeout(function(){URL.revokeObjectURL(u)},1000)}
+var BC={h:260,x:50,y:50,z:100,f:0},adj=0,drag=null;
+try{var _s=JSON.parse(localStorage.getItem(BK+"_c")||"null");if(_s)BC=_s}catch(e){}
+function bsave(){try{localStorage.setItem(BK+"_c",JSON.stringify(BC))}catch(e){}}
+function cl(v){return Math.max(0,Math.min(100,v))}
+function isty(){return "object-fit:"+(BC.f?"contain":"cover")+";object-position:"+BC.x+"% "+BC.y+"%;transform:scale("+BC.z/100+");transform-origin:"+BC.x+"% "+BC.y+"%"}
+function panel(){return "<div class='card'><div class='q'><span class='lb'>Alto del banner: <span id='bhv'>"+BC.h+" px</span></span><input type='range' min='100' max='700' step='10' data-b='h' value='"+BC.h+"' aria-label='Alto del banner'></div><div class='q'><span class='lb'>Zoom</span><input type='range' min='100' max='300' step='5' data-b='z' value='"+BC.z+"' aria-label='Zoom'></div><label class='opt'><input type='checkbox' data-b='f'"+(BC.f?" checked":"")+">Mostrar la imagen completa, sin recortar</label><p class='mu'>Arrastre la imagen del banner para moverla.</p><button id='bdone'>Listo</button></div>"}
+var bannerO="";try{bannerO=localStorage.getItem(BK+"_o")||""}catch(e){}
+function openCrop(){
+var src=bannerO||banner,o=document.createElement("div");o.className="cropm";
+o.innerHTML="<p class='ct'>Arrastre el recuadro para moverlo y los puntos blancos para cambiar su tamaño.</p><div class='stage'><img src='"+src+"' alt='Imagen del banner' draggable='false'><div class='cb'>"+["nw","n","ne","e","se","s","sw","w"].map(function(h){return "<i class='hd' data-h='"+h+"'></i>"}).join("")+"</div></div><div class='ca'><button class='sec' id='cx'>Cancelar</button><button class='sec' id='cr'>Restablecer</button><button id='ok'>Recortar</button></div>";
+document.body.appendChild(o);
+var im=o.querySelector("img"),bx=o.querySelector(".cb"),c,d=null;
+function put(){bx.style.cssText="left:"+c.x+"px;top:"+c.y+"px;width:"+c.w+"px;height:"+c.h+"px"}
+function reset(){c={x:0,y:0,w:im.clientWidth,h:im.clientHeight};put()}
+im.onload=reset;if(im.complete)reset();
+bx.addEventListener("pointerdown",function(e){d={h:e.target.dataset.h||"m",x:e.clientX,y:e.clientY,c:{x:c.x,y:c.y,w:c.w,h:c.h}};bx.setPointerCapture(e.pointerId);e.preventDefault()});
+bx.addEventListener("pointermove",function(e){if(!d)return;var W=im.clientWidth,H=im.clientHeight,dx=e.clientX-d.x,dy=e.clientY-d.y,q=d.c,x1=q.x,y1=q.y,x2=q.x+q.w,y2=q.y+q.h,M=30;
+if(d.h=="m"){x1=Math.max(0,Math.min(W-q.w,q.x+dx));y1=Math.max(0,Math.min(H-q.h,q.y+dy));x2=x1+q.w;y2=y1+q.h}
+else{if(d.h.indexOf("w")>-1)x1=Math.max(0,Math.min(x2-M,x1+dx));if(d.h.indexOf("e")>-1)x2=Math.min(W,Math.max(x1+M,x2+dx));if(d.h.indexOf("n")>-1)y1=Math.max(0,Math.min(y2-M,y1+dy));if(d.h.indexOf("s")>-1)y2=Math.min(H,Math.max(y1+M,y2+dy))}
+c={x:x1,y:y1,w:x2-x1,h:y2-y1};put()});
+bx.addEventListener("pointerup",function(){d=null});
+o.querySelector("#cx").onclick=function(){o.remove()};
+o.querySelector("#cr").onclick=reset;
+o.querySelector("#ok").onclick=function(){var s=im.naturalWidth/im.clientWidth,sw=c.w*s,sh=c.h*s,k=Math.min(1,1400/sw),cv=document.createElement("canvas");cv.width=Math.round(sw*k);cv.height=Math.round(sh*k);cv.getContext("2d").drawImage(im,c.x*s,c.y*s,sw,sh,0,0,cv.width,cv.height);banner=cv.toDataURL("image/jpeg",.85);var aw=document.getElementById("app").clientWidth||700;BC.h=Math.max(100,Math.min(700,Math.round(aw*cv.height/cv.width)));BC.x=50;BC.y=50;BC.z=100;BC.f=0;msg="";try{localStorage.setItem(BK,banner)}catch(e){msg="No se pudo guardar el banner."}bsave();o.remove();render()}
+}
+function pct(n,t){return t?(n/t*100).toFixed(1).replace('.',',')+' %':'0 %'}
+function tb(rows,hd){return "<div style='overflow-x:auto'><table><tr>"+hd.map(function(x){return "<th>"+x+"</th>"}).join("")+"</tr>"+rows.map(function(r){return "<tr>"+r.map(function(x){return "<td>"+esc(x)+"</td>"}).join("")+"</tr>"}).join("")+"</table></div>"}
+function QK(k){var f;S.forEach(function(s){s.q.forEach(function(q){if(q.k==k)f=q})});return f}
+function freq(q){var rs=list.filter(function(r){var v=r[q.k];return Array.isArray(v)?v.length:v}),t=rs.length;if(!t)return "";var rows=q.o.map(function(o){var c=rs.filter(function(r){var v=r[q.k];return Array.isArray(v)?v.indexOf(o)>-1:v===o}).length;return [o,c,pct(c,t)]});return "<h4>"+q.n+". "+esc(q.l)+" (respondieron "+t+")</h4>"+tb(rows,["Opción","Hogares","%"])}
+function cfreq(q){var rows=q.o.map(function(o,i){var k=q.k+"__"+i,h=0,s=0;list.forEach(function(r){var v=+r[k]||0;if(v>0){h++;s+=v}});return [o,h,s]});return "<h4>"+q.n+". "+esc(q.l)+"</h4>"+tb(rows,["Grupo diferencial","Hogares con al menos un integrante","Total de integrantes"])}
+function reporte(lit){
+var n=list.length,P=function(t){return "<p>"+t+"</p>"},ti=0,tn=0,nq=0,nc=0,na=0,ds=list.map(function(r){return r.fecha}).filter(Boolean).sort(),o="";
+list.forEach(function(r){var v=+r.total;if(v>0){ti+=v;tn++}});
+S.forEach(function(s){s.q.forEach(function(q){nq++;if(q.y=="area")na++;else if(q.y!="text"&&q.y!="date")nc++})});
+o+="<h2>7. Metodología</h2><h3>7.1 Enfoque de investigación</h3>"+P("Se adopta un enfoque <b>mixto</b> (cuantitativo–cualitativo). El componente cuantitativo mide, con preguntas cerradas, la vivienda y los servicios, la composición familiar, los medios de vida y la salud y seguridad de los hogares reasentados. El componente cualitativo recoge, con preguntas abiertas, las barreras de infraestructura y convivencia, los riesgos observados y las acciones prioritarias que las familias solicitan a la administración municipal.");
+o+="<h3>7.2 Tipos de investigación</h3>"+P("Investigación <b>descriptiva</b>, porque caracteriza las condiciones de los hogares afectados por el sismo de 2025 tras su reasentamiento; <b>de campo</b>, porque la información se recoge directamente en el territorio con los hogares; y <b>aplicada</b>, porque sus resultados orientan el seguimiento y las decisiones de las alcaldías de Meta y Yopal.");
+o+="<h3>7.3 Diseños de investigación</h3>"+P("Diseño <b>no experimental</b>, <b>transversal descriptivo</b>: no se manipulan variables y se observa la situación de cada hogar en el momento de la encuesta"+(ds.length?" (levantamiento entre el "+ds[0]+" y el "+ds[ds.length-1]+")":"")+". Al repetirse el instrumento a lo largo de la ruta de seguimiento, los datos permiten comparar la evolución de los indicadores entre momentos.");
+o+="<h3>7.4 Población y muestra</h3>"+P("<b>Población:</b> hogares afectados por el sismo de 2025 que fueron reasentados en los municipios de Meta y Yopal. <b>Unidad de análisis:</b> el hogar, representado por su titular o cabeza de hogar.");
+o+=P("<b>Muestra:</b> "+n+" hogares encuestados"+(tn?", con "+ti+" integrantes registrados (promedio de "+(ti/tn).toFixed(1).replace('.',',')+" por hogar)":"")+". El muestreo es <b>no probabilístico, por conveniencia</b>, según el acceso a los hogares en territorio, por lo que los resultados describen a los hogares encuestados y no se extrapolan estadísticamente a toda la población. La ruta metodológica prevé una prueba piloto con 50 familias.");
+o+=freq(QK("mun"))+freq(QK("orig"))+freq(QK("estado"))+"<h4>Gráfica 1: Población vs Muestra por Municipio</h4>"+chartSVG(lit);
+o+="<h3>7.5 Plan de análisis de la información</h3>"+P("1) Depuración: revisión de campos obligatorios y exportación de las respuestas a CSV. 2) Análisis cuantitativo: estadística descriptiva con frecuencias absolutas y relativas por pregunta y por municipio. 3) Análisis cualitativo: análisis de contenido de las respuestas abiertas, agrupadas por categorías. 4) Integración: construcción del Índice de Vulnerabilidad Territorial (vivienda + medios de vida + seguridad y salud en el territorio).");
+o+="<h4>Resultados descriptivos preliminares</h4>";
+S.forEach(function(s){s.q.forEach(function(q){if(q.k=="mun"||q.k=="estado")return;if(q.y=="radio"||q.y=="multi")o+=freq(q);else if(q.y=="counts")o+=cfreq(q)})});
+["barr","riesgo_d","prio1","prio2"].forEach(function(k){var q=QK(k),v=list.map(function(r){return r[k]}).filter(function(x){return x&&String(x).trim()});if(v.length)o+="<h4>"+q.n+". "+esc(q.l)+" ("+v.length+" respuestas)</h4><ul>"+v.map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+"</ul>"});
+o+="<h3>7.5.1 Instrumentos de recolección de información</h3>"+P("Formulario de seguimiento aplicado mediante una aplicación móvil, con "+S.length+" secciones y "+nq+" preguntas: "+nc+" cerradas (opción única, múltiple o numéricas), "+na+" abiertas y el resto de identificación o especificación. Las respuestas se guardan en el dispositivo y se exportan a CSV. Como complemento cualitativo, la ruta prevé grupos focales y entrevistas a profundidad sobre medios de vida.");
+return o}
+function save2(name,data,mime){(window.claude&&claude.use?claude.use("downloads"):Promise.resolve(null)).then(function(d){if(d)return d.save({filename:name,data:data}).catch(function(){});var u=URL.createObjectURL(new Blob([data],{type:mime})),x=document.createElement("a");x.href=u;x.download=name;document.body.appendChild(x);x.click();x.remove();setTimeout(function(){URL.revokeObjectURL(u)},1000)})}
+var T={},TI="",TK="seg_sismo_theme",dsg=0;
+try{T=JSON.parse(localStorage.getItem(TK)||"{}")||{};TI=localStorage.getItem(TK+"_img")||""}catch(e){}
+function lc(h){var n=parseInt(h.slice(1),16);return (0.299*(n>>16&255)+0.587*(n>>8&255)+0.114*(n&255))>150?"#111":"#fff"}
+function saveT(){try{localStorage.setItem(TK,JSON.stringify(T))}catch(e){}}
+function applyT(){var r=[],c="",el=document.getElementById("th");
+if(!el){el=document.createElement("style");el.id="th";document.head.appendChild(el)}
+["bg","sf","ac","tx"].forEach(function(k){if(T[k])r.push("--"+k+":"+T[k])});
+if(r.length)c+=":root:root{"+r.join(";")+"}";
+if(T.opt)c+=".opt{background:"+T.opt+"}.opt:has(input:checked){background:color-mix(in srgb,var(--ac) 18%,"+T.opt+")}";
+if(T.ac)c+="button:not(.sec):not(.del){color:"+lc(T.ac)+"}.bar i{background:"+T.ac+"}";
+if(T.hero||T.ac){var hc=T.hero||T.ac;c+=".hero{background:"+hc+";color:"+lc(hc)+"}"}
+if(T.bgon===false)c+="body::before{display:none}";else{if(TB)c+="body::before{background-image:url('"+TB+"')}";if(T.bgop)c+="body::before{opacity:"+T.bgop/100+"}"}
+if(T.fs)c+="html,body{font-size:"+T.fs+"px}";
+if(T.dev=="m")c+="main{max-width:420px}.nav div{max-width:420px}";else if(T.dev=="t")c+="main{max-width:640px}";
+if(TI){var w="color-mix(in srgb,var(--sf) "+(T.veil||85)+"%,transparent)";c+=".card{background:linear-gradient("+w+","+w+"),url('"+TI+"') center/cover}"}
+el.textContent=c}
+function setTImg(f){if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var w=Math.min(900,im.width),c=document.createElement("canvas");c.width=w;c.height=Math.round(im.height*w/im.width);c.getContext("2d").drawImage(im,0,0,c.width,c.height);TI=c.toDataURL("image/jpeg",.78);try{localStorage.setItem(TK+"_img",TI)}catch(e){msg="No se pudo guardar la imagen en este dispositivo."}applyT();render()};im.src=r.result};r.readAsDataURL(f)}
+var DT="Encuesta de caracterización de hogares afectados por el sismo y seguimiento al reasentamiento",DD="Esta encuesta recopila información sobre vivienda, composición familiar, medios de vida, salud y necesidades de los hogares afectados por el sismo de 2025. Las respuestas servirán para orientar el apoyo institucional y elaborar estadísticas e informes agregados. Responda según la situación actual de su hogar. La participación es voluntaria; evite incluir datos personales innecesarios de otros integrantes.",TB="",THS=[],dtab="c",
+PRE=[{n:"Menta",c:{bg:"#dff3ec",tx:"#222222",ac:"#00a86b"}},{n:"Azul clásico",c:{bg:"#eef1f6",tx:"#18222d",ac:"#3b6cf6"}},{n:"UNGRD",c:{bg:"#e6ecf7",tx:"#0f2342",ac:"#0b2a5b"}}];
+try{TB=localStorage.getItem(TK+"_bg")||"";THS=JSON.parse(localStorage.getItem(TK+"_ths")||"[]")||[]}catch(e){}
+function UN(){return T.mode=="unica"}
+function saveThs(){try{localStorage.setItem(TK+"_ths",JSON.stringify(THS))}catch(e){}}
+function applyTheme(c){["bg","sf","opt","ac","tx","hero"].forEach(function(k){if(c[k])T[k]=c[k];else delete T[k]});applyT();saveT();render()}
+function setTB(f){if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var w=Math.min(1200,im.width),c=document.createElement("canvas");c.width=w;c.height=Math.round(im.height*w/im.width);c.getContext("2d").drawImage(im,0,0,c.width,c.height);TB=c.toDataURL("image/jpeg",.78);try{localStorage.setItem(TK+"_bg",TB)}catch(e){msg="No se pudo guardar la imagen en este dispositivo."}applyT();render()};im.src=r.result};r.readAsDataURL(f)}
+function dpanel2(){
+var sel=function(k,o,cur){return "<select data-t='"+k+"' aria-label='"+k+"'>"+o.map(function(x){return "<option value='"+x[0]+"'"+(String(cur)==x[0]?" selected":"")+">"+x[1]+"</option>"}).join("")+"</select>"},
+tg=function(k,on){return "<input type='checkbox' class='tg' data-tb='"+k+"'"+(on?" checked":"")+" aria-label='"+k+"'>"},
+rw=function(l,c,s){return "<div class='dr'><b>"+l+(s?"<small>"+s+"</small>":"")+"</b>"+c+"</div>"},
+h="<div class='card dp'><div class='tabs'><button id='tabc'"+(dtab=="c"?" class='on'":"")+">Configuraciones</button><button id='tabt'"+(dtab=="t"?" class='on'":"")+">Temas</button></div>";
+if(dtab=="t"){var sw=function(c){return ["bg","ac","tx"].map(function(k){return "<i style='background:"+(c[k]||"#ccc")+"'></i>"}).join("")};
+PRE.forEach(function(p,i){h+="<div class='th'><span>"+sw(p.c)+esc(p.n)+"</span><button class='sec' data-ap='p"+i+"'>Aplicar</button></div>"});
+THS.forEach(function(p,i){h+="<div class='th'><span>"+sw(p.c)+esc(p.n)+"</span><span><button class='sec' data-ap='s"+i+"'>Aplicar</button> <button class='del' data-td='"+i+"'>Borrar</button></span></div>"});
+if(!THS.length)h+="<p class='mu'>Aún no tiene temas propios. Cree uno en Configuraciones con «Guardar como tema».</p>";
+return h+"<div class='acts' style='margin-top:14px'><button id='tdone'>Listo</button></div></div>"}
+h+=rw("Modo de encuesta",sel("mode",[["clasico","Clásico (por secciones)"],["unica","Una sola página"]],T.mode||"clasico"));
+h+=rw("Portada de la encuesta",tg("cover",T.cover));
+h+="<div class='q' style='margin-top:14px'><span class='lb'>Título de la encuesta</span><input type='text' data-t='title' value='"+esc(T.title||DT)+"' aria-label='Título'><span class='lb' style='margin-top:12px'>Descripción</span><textarea data-t='desc' aria-label='Descripción'>"+esc(T.desc||DD)+"</textarea></div>";
+h+=rw("Imagen de fondo",tg("bgon",T.bgon!==false),"Personalizar estilo de fondo");
+if(T.bgon!==false)h+="<div class='q' style='margin-top:12px'><div class='acts'><button class='sec' id='bgpick'>Cambiar imagen</button><input type='file' id='bgf' accept='image/*' hidden>"+(TB?"<button class='sec' id='bgrm'>Usar la predeterminada</button>":"")+"</div><span class='lb' style='margin-top:12px'>Visibilidad de la imagen</span><input type='range' min='5' max='60' data-t='bgop' value='"+(T.bgop||13)+"' aria-label='Visibilidad de la imagen'></div>";
+h+="<div class='dr' style='border:0;padding-bottom:0'><b>Combinación de colores</b></div><div class='sws'>"+[["bg","Fondo","#eef1f6"],["tx","Preguntas","#18222d"],["ac","Botones y título","#3b6cf6"]].map(function(r){return "<label class='sw'><input type='color' data-t='"+r[0]+"' value='"+(T[r[0]]||r[2])+"' aria-label='"+r[1]+"'>"+r[1]+"</label>"}).join("")+"</div>";
+h+=rw("Tamaño de fuente",sel("fs",[["14","Pequeño"],["16","Estándar"],["18","Grande"],["20","Muy grande"]],T.fs||16));
+h+=rw("Vista previa","<span class='seg'>"+[["m","Celular"],["t","Tableta"],["d","Computador"]].map(function(d){return "<button data-dev='"+d[0]+"'"+((T.dev||"d")==d[0]?" class='on'":"")+">"+d[1]+"</button>"}).join("")+"</span>");
+h+="<details style='margin:12px 0'><summary><b>Colores avanzados</b></summary>"+[["sf","Tarjetas de preguntas","#ffffff"],["opt","Opciones de respuesta","#eef1f6"],["hero","Cabecera","#3b6cf6"]].map(function(r){return "<label class='cnt'><span>"+r[1]+"</span><input type='color' data-t='"+r[0]+"' value='"+(T[r[0]]||r[2])+"' aria-label='"+r[1]+"'></label>"}).join("")+"<div class='q' style='margin-top:14px'><span class='lb'>Imagen de fondo de las tarjetas</span><div class='acts'><button class='sec' id='tpick'>"+(TI?"Cambiar imagen":"Agregar imagen")+"</button><input type='file' id='tf' accept='image/*' hidden>"+(TI?"<button class='sec' id='trm'>Quitar imagen</button>":"")+"</div></div>"+(TI?"<div class='q'><span class='lb'>Intensidad de la capa sobre la imagen</span><input type='range' min='30' max='100' data-t='veil' value='"+(T.veil||85)+"' aria-label='Intensidad de la capa'></div>":"")+"</details>";
+h+=ftPanel();
+return h+"<input type='text' id='tn' placeholder='Nombre del tema' aria-label='Nombre del tema'><button class='big' id='tsave' style='margin:12px 0 8px'>Guardar</button><div class='acts'><button class='sec' id='tmk'>Guardar como tema</button><button class='sec' id='tclr'>Limpiar apariencia</button></div></div>"}
+/* >>> REEMPLACE PEGAR_AQUI_BASE64_PIE por la cadena base64 original de la imagen del pie de página (la que empieza en /9j/4AAQ... dentro de FIMG) <<< */
+var FIMG='data:image/jpeg;base64,PEGAR_AQUI_BASE64_PIE';
+var MTO="";try{MTO=localStorage.getItem("seg_sismo_mto")||""}catch(e){}
+function secs(r){var o=[];S.forEach(function(s){var it=[];s.q.forEach(function(q){var v;if(q.y=="counts"){var p=[];q.o.forEach(function(x,i){var n=+r[q.k+"__"+i];if(n>0)p.push(x+": "+n)});v=p.join("; ")}else{v=r[q.k];if(Array.isArray(v))v=v.join(", ")}if(v!==undefined&&v!==null&&String(v).trim()!=="")it.push([q.n+". "+q.l,String(v)])});if(it.length)o.push({t:s.t,i:it})});return o}
+function rgb(h){var n=parseInt((h||"#3b6cf6").slice(1),16);return [n>>16&255,n>>8&255,n&255]}
+function pdfOf(r,cb){
+if(!window.jspdf&&cb){cb(null);return}
+if(!window.jspdf){msg="No se pudo cargar el generador de PDF. Conecte el dispositivo a internet e intente de nuevo.";render();return}
+var D=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),m=15,tw=180,y=m,c=rgb(T.ac);
+function chk(h){if(y+h>285){D.addPage();y=m}}
+function wr(txt,x,w,f,sz,col,lh){D.setFont("helvetica",f);D.setFontSize(sz);D.setTextColor(col[0],col[1],col[2]);D.splitTextToSize(txt,w).forEach(function(l){chk(lh);D.text(l,x,y);y+=lh})}
+wr(T.title||DT,m,tw,"bold",14,c,6.5);y+=2;
+wr("Fecha: "+(r.fecha||"")+"   Municipio: "+(r.mun||""),m,tw,"normal",9,[90,100,115],5);y+=3;
+secs(r).forEach(function(s){chk(14);y+=2;D.setDrawColor(c[0],c[1],c[2]);D.setLineWidth(.5);D.line(m,y,m+tw,y);y+=5;wr(s.t,m,tw,"bold",11.5,c,5.5);y+=1;s.i.forEach(function(x){wr(x[0],m,tw,"bold",9,[40,50,60],4.4);wr(x[1],m+4,tw-4,"normal",10,[20,25,30],4.8);y+=1.6})});
+y+=4;ftList().forEach(function(f){var w=tw,ih=w*f.r;if(ih>110){ih=110;w=ih/f.r}chk(ih+6);try{D.addImage(f.d,"JPEG",m+(tw-w)/2,y,w,ih)}catch(e){}y+=ih+4});
+var nm="encuesta_"+String(r.doc||r.nombre||"hogar").replace(/[^A-Za-z0-9_-]+/g,"_")+".pdf",bl=D.output("blob");if(cb)cb(bl,nm);else save2(nm,bl,"application/pdf")}
+function mailDlg(r){
+var b="Buen día,\n\nAdjunto en PDF la encuesta de seguimiento del hogar de "+(r.nombre||"(sin nombre)")+".\n\nCordial saludo.",su="Encuesta de seguimiento - "+(r.nombre||"hogar"),o=document.createElement("div");o.className="cropm";
+o.innerHTML="<div class='card' style='width:100%;max-width:560px;max-height:92vh;overflow:auto;margin:0'><h2 class='st'>Enviar por correo</h2><p class='mu'>El correo va con la encuesta en PDF. Esta página no tiene servidor de correo: en celular el PDF queda adjunto desde el menú de compartir; en computador se descarga el PDF y se abre el borrador para que lo adjunte.</p><div class='q'><span class='lb'>Para</span><input type='text' id='mdTo' inputmode='email' placeholder='correo@ejemplo.com' value='"+esc(MTO)+"'></div><div class='q'><span class='lb'>Asunto</span><input type='text' id='mdSu' value='"+esc(su)+"'></div><div class='q'><span class='lb'>Mensaje</span><textarea id='mdBo' style='min-height:150px'>"+esc(b)+"</textarea></div><div class='acts' style='flex-direction:column;align-items:stretch'><button id='mdS'>Enviar por correo como PDF</button><a class='lnk' id='mdG' target='_blank' rel='noopener'>Abrir en Gmail</a><a class='lnk' id='mdO' target='_blank' rel='noopener'>Abrir en Outlook web</a><a class='lnk' id='mdM' target='_blank' rel='noopener'>Abrir en mi app de correo</a><button class='sec' id='mdP'>Descargar el PDF para adjuntarlo</button><button class='sec' id='mdC'>Copiar el mensaje</button><button class='sec' id='mdX'>Cerrar</button></div><p class='mu' id='mdN'>Al abrir Gmail, Outlook o su app de correo también se descarga el PDF para que lo adjunte. Si un botón no abre nada, el navegador puede estar bloqueando ventanas emergentes en esta vista: copie el mensaje o abra el archivo directamente en su navegador.</p></div>";
+document.body.appendChild(o);
+var g=function(i){return o.querySelector("#"+i)},en=encodeURIComponent,note=function(t){g("mdN").textContent=t};
+function upd(){var to=g("mdTo").value.trim(),s2=g("mdSu").value,bo=g("mdBo").value;MTO=to;try{localStorage.setItem("seg_sismo_mto",MTO)}catch(e){}
+g("mdG").href="https://mail.google.com/mail/?view=cm&fs=1&to="+en(to)+"&su="+en(s2)+"&body="+en(bo.slice(0,4000));
+g("mdO").href="https://outlook.office.com/mail/deeplink/compose?to="+en(to)+"&subject="+en(s2)+"&body="+en(bo.slice(0,4000));
+g("mdM").href="mailto:"+en(to)+"?subject="+en(s2)+"&body="+en(bo.slice(0,1700))}
+upd();o.addEventListener("input",upd);["mdG","mdO","mdM"].forEach(function(id){g(id).addEventListener("click",function(){pdfOf(r)})});
+g("mdX").onclick=function(){o.remove();render()};
+g("mdP").onclick=function(){pdfOf(r)};
+g("mdC").onclick=function(){var bo=g("mdBo");var fb=function(){bo.select();try{document.execCommand("copy");note("Mensaje copiado. Péguelo en su correo.")}catch(e){note("No se pudo copiar; selecciónelo y cópielo manualmente.")}};(navigator.clipboard?navigator.clipboard.writeText(bo.value).then(function(){note("Mensaje copiado. Péguelo en su correo.")},fb):fb())};
+g("mdS").onclick=function(){pdfOf(r,function(bl,nm){if(!bl){note("No se pudo generar el PDF (necesita internet la primera vez).");return}var f=new File([bl],nm,{type:"application/pdf"});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:g("mdSu").value,text:g("mdBo").value}).catch(function(){})}else{save2(nm,bl,"application/pdf");upd();var a=document.createElement("a");a.href=g("mdG").href;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();note("Se descargó el PDF "+nm+" y se abrió el borrador en Gmail. Adjunte ese archivo al correo antes de enviarlo.")}})}}
+function mailOf(r){var b=secs(r).map(function(s){return s.t.toUpperCase()+"\n"+s.i.map(function(x){return x[0]+": "+x[1]}).join("\n")}).join("\n\n"),sub="Encuesta de seguimiento - "+(r.nombre||"hogar");
+if(b.length>1700)b=b.slice(0,1700)+"\n[...texto recortado; adjunte el PDF o el CSV para ver todo]";
+var u="mailto:"+encodeURIComponent((MTO||"").trim())+"?subject="+encodeURIComponent(sub)+"&body="+encodeURIComponent(b),x=document.createElement("a");x.href=u;x.target="_blank";x.rel="noopener";document.body.appendChild(x);x.click();x.remove();
+msg="Se abrió el borrador de correo con el resumen en texto. Para adjuntar el archivo, descargue antes el PDF y añádalo.";render();
+(navigator.clipboard?navigator.clipboard.writeText(sub+"\n\n"+b):Promise.reject()).then(function(){msg+=" También se copió el texto por si el correo no se abre.";render()},function(){})}
+document.addEventListener("input",function(e){if(e.target.id=="mto"){MTO=e.target.value;try{localStorage.setItem("seg_sismo_mto",MTO)}catch(x){}}});
+var MUNS=["Paratebueno","Medina","Cabuyaro","Barranca de Upía"],POP=[450,280,190,150];
+try{var _pp=JSON.parse(localStorage.getItem("seg_sismo_pop")||"null");if(_pp&&_pp.length==4)POP=_pp}catch(e){}
+function chartSVG(lit){
+var c1="#2f86ab",c2="#f6ae2d",tx=lit?"#333":"var(--tx)",mu=lit?"#666":"var(--mu)",ln=lit?"#ddd":"var(--ln)",
+sm=MUNS.map(function(m){return list.filter(function(r){return r.orig===m}).length}),
+mx=Math.max.apply(null,POP.concat(sm).concat([1])),raw=mx/5,mag=Math.pow(10,Math.floor(Math.log10(raw))),st=[1,2,5,10].map(function(k){return k*mag}).filter(function(v){return v>=raw})[0],top=Math.ceil(mx/st)*st,
+W=640,H=360,L=48,R=12,Tp=52,B=44,pw=W-L-R,ph=H-Tp-B,gw=pw/MUNS.length,bw=gw*.34,
+Y=function(v){return Tp+ph-v/top*ph},
+s="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 "+W+" "+H+"' "+(lit?"width='"+W+"' height='"+H+"'":"width='100%'")+" role='img' aria-label='Gráfica de población frente a muestra por municipio' style='max-width:100%;height:auto;font-family:"+(lit?"Arial,sans-serif":"inherit")+"'>"+(lit?"<rect width='"+W+"' height='"+H+"' fill='#fff'/>":"");
+for(var v=0;v<=top+0.001;v+=st){s+="<line x1='"+L+"' x2='"+(W-R)+"' y1='"+Y(v)+"' y2='"+Y(v)+"' style='stroke:"+ln+"'/><text x='"+(L-6)+"' y='"+(Y(v)+4)+"' text-anchor='end' font-size='11' style='fill:"+mu+"'>"+v+"</text>"}
+s+="<text transform='translate(12 "+(Tp+ph/2)+") rotate(-90)' text-anchor='middle' font-size='11' style='fill:"+mu+"'>Número de familias</text>";
+s+="<rect x='"+L+"' y='10' width='14' height='10' fill='"+c1+"'/><text x='"+(L+20)+"' y='19' font-size='12' style='fill:"+tx+"'>Población total (familias afectadas)</text><rect x='"+(L+270)+"' y='10' width='14' height='10' fill='"+c2+"'/><text x='"+(L+290)+"' y='19' font-size='12' style='fill:"+tx+"'>Muestra encuestada</text>";
+MUNS.forEach(function(m,i){var x=L+i*gw+gw/2-bw,p=POP[i]||0;
+s+="<rect x='"+x+"' y='"+Y(p)+"' width='"+bw+"' height='"+(Tp+ph-Y(p))+"' fill='"+c1+"'/><text x='"+(x+bw/2)+"' y='"+(Y(p)-4)+"' text-anchor='middle' font-size='11' style='fill:"+tx+"'>"+p+"</text>";
+s+="<rect x='"+(x+bw)+"' y='"+Y(sm[i])+"' width='"+bw+"' height='"+(Tp+ph-Y(sm[i]))+"' fill='"+c2+"'/><text x='"+(x+bw*1.5)+"' y='"+(Y(sm[i])-4)+"' text-anchor='middle' font-size='11' style='fill:"+tx+"'>"+sm[i]+"</text>";
+s+="<text x='"+(L+i*gw+gw/2)+"' y='"+(Tp+ph+20)+"' text-anchor='middle' font-size='12' style='fill:"+mu+"'>"+m+"</text>"});
+return s+"</svg>"}
+function pieP(title,sub,labels,cnt,cfg,lit){
+var cols=PAL[cfg.pal||0][1],tx=lit?"#333":"var(--tx)",mu=lit?"#666":"var(--mu)",W=640,H=400,tl=wrapT(title,58),top=14+tl.length*21+24,sum=cnt.reduce(function(a,b){return a+b},0),
+s="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 "+W+" "+H+"'>"+tsp(16,28,tl,"start",17,tx,21,600)+tsp(16,top-8,[sub],"start",12,mu,14);
+if(!sum)return s+tsp(W/2,top+(H-top)/2,["Aún no hay datos."],"middle",13,mu,16)+"</svg>";
+var cx=W/2,cy=top+(H-top)/2,r=Math.min((H-top)/2-30,135),ri=cfg.t=="donut"?r*.55:0,ang=-Math.PI/2,nz=cnt.filter(function(c){return c>0}).length;
+cnt.forEach(function(c,i){if(!c)return;var col=cols[i%cols.length],a=c/sum*2*Math.PI,a0=ang,a1=ang+a,mid=(a0+a1)/2,P=function(rr,t){return (cx+rr*Math.cos(t)).toFixed(1)+" "+(cy+rr*Math.sin(t)).toFixed(1)},lg=a>Math.PI?1:0,d;ang=a1;
+if(nz==1){d="M"+P(r,0)+" A"+r+" "+r+" 0 1 1 "+P(r,Math.PI)+" A"+r+" "+r+" 0 1 1 "+P(r,0)+"Z"+(ri?" M"+P(ri,0)+" A"+ri+" "+ri+" 0 1 1 "+P(ri,Math.PI)+" A"+ri+" "+ri+" 0 1 1 "+P(ri,0)+"Z":"")}
+else d=ri?"M"+P(r,a0)+" A"+r+" "+r+" 0 "+lg+" 1 "+P(r,a1)+" L"+P(ri,a1)+" A"+ri+" "+ri+" 0 "+lg+" 0 "+P(ri,a0)+"Z":"M"+cx+" "+cy+" L"+P(r,a0)+" A"+r+" "+r+" 0 "+lg+" 1 "+P(r,a1)+"Z";
+s+="<path d='"+d+"' fill='"+col+"' fill-rule='evenodd' style='stroke:"+(lit?"#fff":"var(--sf)")+";stroke-width:1.5'/>";
+var mr=ri?(r+ri)/2:r*.62,lx=cx+mr*Math.cos(mid),ly=cy+mr*Math.sin(mid);
+if(a>.2)s+=tsp(lx.toFixed(1),(ly+4).toFixed(1),[fmtv(c,sum,cfg.val)],"middle",13,lc(col),14,600);
+var ox=cx+(r+14)*Math.cos(mid),oy=cy+(r+14)*Math.sin(mid);
+s+=tsp(ox.toFixed(1),(oy+4).toFixed(1),wrapT(labels[i]+(a>.2?"":" ("+fmtv(c,sum,cfg.val)+")"),18),Math.cos(mid)>=0?"start":"end",12,tx,14)});
+return s+"</svg>"}
+function allChart(lit){var W=640,gap=24,y=0,b="",ln=lit?"#ccc":"var(--ln)",ps=[],
+pc=function(o){return {pal:o.pal||0,val:o.val||"pct",t:o.t=="donut"?"donut":"pie"}},base=pc(CH[0]||{}),
+sm=MUNS.map(function(m){return list.filter(function(r){return r.orig===m}).length}),
+sp=POP.reduce(function(a,b){return a+b},0),ss=sm.reduce(function(a,b){return a+b},0);
+ps.push(pieP("Gráfica 1a: Población total por municipio (familias afectadas)","Población n="+sp,MUNS,POP,base,lit));
+ps.push(pieP("Gráfica 1b: Muestra encuestada por municipio","Muestra n="+ss,MUNS,sm,base,lit));
+CH.forEach(function(c,i){var ks=cfgKeys(c),cf=pc(c),add=0;
+ks.forEach(function(k,j){var q=QK(k);if(!q)return;
+var g=chartGen(Object.assign({},c,cf,{v:k,title:ks.length>1?"Gráfica "+(i+3)+"."+(j+1)+": "+q.l:c.title}),i,lit);
+if(g.n>0||ks.length==1||(j==ks.length-1&&!add)){ps.push(g.svg);add++}})});
+ps.forEach(function(sv,k){var h=400;if(k){b+="<line x1='16' x2='"+(W-16)+"' y1='"+(y+gap/2)+"' y2='"+(y+gap/2)+"' style='stroke:"+ln+"'/>";y+=gap}
+b+=sv.replace(/^<svg[^>]*>/,"<svg x='0' y='"+y+"' width='"+W+"' height='"+h+"' viewBox='0 0 "+W+" "+h+"'>");y+=h});
+return "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 "+W+" "+y+"' "+(lit?"width='"+W+"' height='"+y+"'":"width='100%'")+" role='img' aria-label='Gráfica única del seguimiento' style='max-width:100%;height:auto;font-family:"+(lit?"Arial,sans-serif":"inherit")+"'>"+(lit?"<rect width='"+W+"' height='"+y+"' fill='#fff'/>":"")+b+"</svg>"}
+function refreshAll(){var d=document.getElementById("chart");if(d)d.innerHTML=allChart()}
+function chartsCard(){return "<div class='card dp'><h2>Gráfica del seguimiento</h2><p class='mu'>Todo en una sola gráfica circular: población, muestra y las preguntas elegidas. Se actualiza con cada encuesta guardada.</p><div id='chart'>"+allChart()+"</div><div class='acts' style='margin-top:12px'><button id='chpngall'>Descargar imagen</button><button class='sec' id='chadd'>Agregar otra gráfica a esta</button></div><details style='margin-top:14px'><summary><b>Editar población total (familias afectadas)</b></summary>"+MUNS.map(function(m,i){return "<label class='cnt'><span>"+m+"</span><input type='number' min='0' inputmode='numeric' data-pop='"+i+"' value='"+POP[i]+"' aria-label='Población de "+m+"'></label>"}).join("")+"</details>"+CH.map(chCard).join("")+"</div>"}
+document.addEventListener("input",function(e){var i=e.target.dataset.pop;if(i===undefined)return;POP[+i]=Math.max(0,+e.target.value||0);try{localStorage.setItem("seg_sismo_pop",JSON.stringify(POP))}catch(x){}refreshAll()});
+var PAL=[["Estándar",["#f4a261","#e9c46a","#264653","#2a9d8f","#e76f51","#8ab17d","#6d597a","#b56576"]],["Azules y verdes",["#2f86ab","#2a9d8f","#7fb7be","#1d4e6b","#8ab17d","#4a6fa5","#a8dadc","#457b9d"]],["Vivos",["#3b6cf6","#f6ae2d","#e63946","#2a9d8f","#9b5de5","#f15bb5","#00bbf9","#8ac926"]],["Suaves",["#ffadad","#ffd6a5","#fdffb6","#caffbf","#9bf6ff","#a0c4ff","#bdb2ff","#ffc6ff"]]];
+var CH=[{v:"segsoc",t:"pie",pal:0,val:"pct",title:"Gráfica 3: Seguridad social en el trabajo tras el desplazamiento"}];
+try{var _c=JSON.parse(localStorage.getItem("seg_sismo_charts")||"null");if(_c&&_c.length)CH=_c}catch(e){}
+function saveCH(){try{localStorage.setItem("seg_sismo_charts",JSON.stringify(CH))}catch(e){}}
+function chQs(){var o=[];S.forEach(function(s){s.q.forEach(function(q){if(q.y=="radio"||q.y=="multi")o.push(q)})});return o}
+function wrapT(s,max){var w=String(s).split(" "),L=[],c="";w.forEach(function(x){if(c&&(c+" "+x).length>max){L.push(c);c=x}else c=c?c+" "+x:x});if(c)L.push(c);return L}
+function tsp(x,y,lines,anc,fs,fill,lh,wt){return "<text x='"+x+"' y='"+y+"' text-anchor='"+anc+"' font-size='"+fs+"' style='fill:"+fill+";font-weight:"+(wt||400)+"'>"+lines.map(function(l,i){return "<tspan x='"+x+"' dy='"+(i?lh:0)+"'>"+esc(l)+"</tspan>"}).join("")+"</text>"}
+function fmtv(c,tot,m){var p=tot?Math.round(c/tot*1000)/10:0;return m=="cnt"?String(c):m=="both"?c+" ("+p+"%)":p+"%"}
+function chartGen(cfg,idx,lit){
+var q=QK(cfg.v);if(!q)return {svg:"",n:0};
+var rs=list.filter(function(r){var v=r[q.k];return Array.isArray(v)?v.length:v}),n=rs.length,
+cnt=q.o.map(function(o){return rs.filter(function(r){var v=r[q.k];return Array.isArray(v)?v.indexOf(o)>-1:v===o}).length}),
+sum=cnt.reduce(function(a,b){return a+b},0),cols=PAL[cfg.pal||0][1],
+tx=lit?"#333":"var(--tx)",mu=lit?"#666":"var(--mu)",ln=lit?"#ddd":"var(--ln)",W=640,H=400,
+title=cfg.title||("Gráfica "+(idx+3)+": "+q.l),tl=wrapT(title,58),top=14+tl.length*21+24,
+s="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 "+W+" "+H+"' "+(lit?"width='"+W+"' height='"+H+"'":"width='100%'")+" role='img' aria-label='"+esc(title)+"' style='max-width:100%;height:auto;font-family:"+(lit?"Arial,sans-serif":"inherit")+"'>";
+if(lit)s+="<rect width='"+W+"' height='"+H+"' fill='#fff'/>";
+s+=tsp(16,28,tl,"start",17,tx,21,600)+tsp(16,top-8,["Muestra n="+n],"start",12,mu,14);
+if(!sum){s+=tsp(W/2,top+(H-top)/2,["Aún no hay respuestas para esta pregunta."],"middle",13,mu,16);return {svg:s+"</svg>",n:n}}
+if(cfg.t=="pie"||cfg.t=="donut"){
+var cx=W/2,cy=top+(H-top)/2,r=Math.min((H-top)/2-30,135),ri=cfg.t=="donut"?r*.55:0,ang=-Math.PI/2,nz=cnt.filter(function(c){return c>0}).length;
+cnt.forEach(function(c,i){if(!c)return;var col=cols[i%cols.length],a=c/sum*2*Math.PI,a0=ang,a1=ang+a,mid=(a0+a1)/2,P=function(rr,t){return (cx+rr*Math.cos(t)).toFixed(1)+" "+(cy+rr*Math.sin(t)).toFixed(1)},lg=a>Math.PI?1:0,d;ang=a1;
+if(nz==1){d="M"+P(r,0)+" A"+r+" "+r+" 0 1 1 "+P(r,Math.PI)+" A"+r+" "+r+" 0 1 1 "+P(r,0)+"Z"+(ri?" M"+P(ri,0)+" A"+ri+" "+ri+" 0 1 1 "+P(ri,Math.PI)+" A"+ri+" "+ri+" 0 1 1 "+P(ri,0)+"Z":"")}
+else d=ri?"M"+P(r,a0)+" A"+r+" "+r+" 0 "+lg+" 1 "+P(r,a1)+" L"+P(ri,a1)+" A"+ri+" "+ri+" 0 "+lg+" 0 "+P(ri,a0)+"Z":"M"+cx+" "+cy+" L"+P(r,a0)+" A"+r+" "+r+" 0 "+lg+" 1 "+P(r,a1)+"Z";
+s+="<path d='"+d+"' fill='"+col+"' fill-rule='evenodd' style='stroke:"+(lit?"#fff":"var(--sf)")+";stroke-width:1.5'/>";
+var mr=ri?(r+ri)/2:r*.62,lx=cx+mr*Math.cos(mid),ly=cy+mr*Math.sin(mid);
+if(a>.2)s+=tsp(lx.toFixed(1),(ly+4).toFixed(1),[fmtv(c,sum,cfg.val)],"middle",13,lc(col),14,600);
+var ox=cx+(r+14)*Math.cos(mid),oy=cy+(r+14)*Math.sin(mid);
+s+=tsp(ox.toFixed(1),(oy+4).toFixed(1),wrapT(q.o[i]+(a>.2?"":" ("+fmtv(c,sum,cfg.val)+")"),18),Math.cos(mid)>=0?"start":"end",12,tx,14)});
+if(ri)s+=tsp(cx,cy+4,["n="+n],"middle",14,mu,16,600);
+return {svg:s+"</svg>",n:n}}
+var N=q.o.length,mx=Math.max.apply(null,cnt.concat([1])),raw=mx/5,mag=Math.pow(10,Math.floor(Math.log10(raw))),st=[1,2,5,10].map(function(k){return k*mag}).filter(function(v){return v>=raw})[0],tp=Math.ceil(mx/st)*st;
+if(cfg.t=="hbar"){
+var L=150,R=80,Tp=top+4,B=14,pw=W-L-R,ph=H-Tp-B,rh=ph/N,bh=Math.min(rh*.62,30);
+cnt.forEach(function(c,i){var y=Tp+i*rh+(rh-bh)/2,w=c/tp*pw,ls=wrapT(q.o[i],24);
+s+="<rect x='"+L+"' y='"+y.toFixed(1)+"' width='"+w.toFixed(1)+"' height='"+bh.toFixed(1)+"' fill='"+cols[i%cols.length]+"'/>"+tsp(L-8,(y+bh/2+4-(ls.length-1)*6.5).toFixed(1),ls,"end",11,mu,13)+tsp((L+w+6).toFixed(1),(y+bh/2+4).toFixed(1),[fmtv(c,n,cfg.val)],"start",12,tx,14)});
+return {svg:s+"</svg>",n:n}}
+var L2=48,R2=12,Tp2=top+16,B2=64,pw2=W-L2-R2,ph2=H-Tp2-B2,gw=pw2/N,bw=Math.min(gw*.6,80),Y=function(v){return Tp2+ph2-v/tp*ph2};
+for(var v=0;v<=tp+0.001;v+=st)s+="<line x1='"+L2+"' x2='"+(W-R2)+"' y1='"+Y(v).toFixed(1)+"' y2='"+Y(v).toFixed(1)+"' style='stroke:"+ln+"'/>"+tsp(L2-6,(Y(v)+4).toFixed(1),[v],"end",11,mu,12);
+cnt.forEach(function(c,i){var x=L2+i*gw+gw/2-bw/2;
+s+="<rect x='"+x.toFixed(1)+"' y='"+Y(c).toFixed(1)+"' width='"+bw.toFixed(1)+"' height='"+(Tp2+ph2-Y(c)).toFixed(1)+"' fill='"+cols[i%cols.length]+"'/>"+tsp((x+bw/2).toFixed(1),(Y(c)-5).toFixed(1),[fmtv(c,n,cfg.val)],"middle",12,tx,14)+tsp((x+bw/2).toFixed(1),Tp2+ph2+16,wrapT(q.o[i],14),"middle",11,mu,13)});
+return {svg:s+"</svg>",n:n}}
+/* NUEVO: una sola gráfica con todas las preguntas seleccionadas (barras horizontales agrupadas) */
+function chartMulti(cfg,idx,lit){
+var ks=cfgKeys(cfg),cols=PAL[cfg.pal||0][1],tx=lit?"#333":"var(--tx)",mu=lit?"#666":"var(--mu)",ln=lit?"#ddd":"var(--ln)",W=640,L=230,R=90,pw=W-L-R,
+title=cfg.title||("Gráfica "+(idx+3)+": Resultados por pregunta"),tl=wrapT(title,58),G=[],omit=0;
+ks.forEach(function(k){var q=QK(k);if(!q)return;var rs=list.filter(function(r){var v=r[q.k];return Array.isArray(v)?v.length:v}),n=rs.length;if(!n){omit++;return}
+G.push({q:q,n:n,col:cols[G.length%cols.length],cnt:q.o.map(function(o){return rs.filter(function(r){var v=r[q.k];return Array.isArray(v)?v.indexOf(o)>-1:v===o}).length})})});
+var y=tl.length*21+30,b="",H;
+if(!G.length){b=tsp(W/2,y+30,["Aún no hay respuestas para las preguntas seleccionadas."],"middle",13,mu,16);y+=60}
+else{
+G.forEach(function(g){
+var hl=wrapT(g.q.n+". "+g.q.l+" (n="+g.n+")",85);
+b+=tsp(16,y+12,hl,"start",12,tx,14,600);y+=hl.length*14+8;
+var y0=y;
+g.q.o.forEach(function(o,i){var c=g.cnt[i],ls=wrapT(o,34),rh=Math.max(24,ls.length*13+8),w=c/g.n*pw;
+b+=tsp(L-8,(y+rh/2+4-(ls.length-1)*6.5).toFixed(1),ls,"end",11,mu,13)+"<rect x='"+L+"' y='"+(y+(rh-14)/2).toFixed(1)+"' width='"+w.toFixed(1)+"' height='14' fill='"+g.col+"'/>"+tsp((L+w+6).toFixed(1),(y+rh/2+4).toFixed(1),[fmtv(c,g.n,cfg.val)],"start",12,tx,14);y+=rh});
+b+="<line x1='"+L+"' x2='"+L+"' y1='"+y0+"' y2='"+y+"' style='stroke:"+ln+"'/>";y+=14});
+b+=tsp(16,y+4,["Largo de la barra = % de hogares que respondieron cada pregunta"],"start",10,mu,12);y+=16}
+H=Math.ceil(y+4);
+var s="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 "+W+" "+H+"' "+(lit?"width='"+W+"' height='"+H+"'":"width='100%'")+" role='img' aria-label='"+esc(title)+"' style='max-width:100%;height:auto;font-family:"+(lit?"Arial,sans-serif":"inherit")+"'>"+(lit?"<rect width='"+W+"' height='"+H+"' fill='#fff'/>":"")+tsp(16,28,tl,"start",17,tx,21,600)+b+"</svg>";
+return {svg:s,parts:[s],n:G.length,omit:omit,ratio:H/W}}
+function chCard(c,i){
+var sl=function(f,arr,cur){return "<select data-ch='"+i+"' data-f='"+f+"' aria-label='"+f+"'>"+arr.map(function(x){return "<option value='"+x[0]+"'"+(String(x[0])==String(cur)?" selected":"")+">"+esc(x[1])+"</option>"}).join("")+"</select>"},
+rw=function(l,x){return "<div class='dr'><b>"+l+"</b>"+x+"</div>"};
+return "<div class='cgb' style='border-top:1px solid var(--ln);margin-top:16px;padding-top:12px'><details style='margin-top:10px' open><summary><b>Opciones de la gráfica "+(i+2)+"</b></summary>"
++rw("Pregunta a graficar",sl("v",[["__all","★ Todas las preguntas"],["__sel","Varias (marcar abajo)"]].concat(chQs().map(function(q){return [q.k,(q.n+". "+q.l).slice(0,70)]})),selVal(c)))+chkList(c,i)
++"<div id='tr"+i+"'"+""+">"+rw("Tipo de gráfica",sl("t",[["pie","Circular (torta)"],["donut","Dona"]],c.t))+"</div>"
++rw("Valores",sl("val",[["pct","Porcentaje"],["cnt","Cantidad"],["both","Cantidad y porcentaje"]],c.val))
++rw("Colores",sl("pal",PAL.map(function(p,k){return [k,p[0]]}),c.pal||0))
++"<div class='q' style='margin-top:12px'><span class='lb'>Título de la gráfica</span><input type='text' data-ch='"+i+"' data-f='title' value='"+esc(c.title||"")+"' placeholder='Título automático' aria-label='Título de la gráfica'></div>"
++"<div class='acts'><button class='del' data-chdel='"+i+"'>Quitar</button></div></details></div>"}
+var FI=null;try{var _f=JSON.parse(localStorage.getItem("seg_sismo_ft")||"null");if(_f&&_f.length!==undefined)FI=_f}catch(e){}
+function ftList(){return FI||[{d:FIMG,r:.64}]}
+function saveFI(){try{localStorage.setItem("seg_sismo_ft",JSON.stringify(FI))}catch(e){msg="No se pudieron guardar todas las imágenes en este dispositivo (espacio lleno)."}}
+function ft(){var a=ftList(),h="<div class='ft'>";
+if(a.length==1){h+="<img class='one' src='"+a[0].d+"' alt='Imagen del pie de página'>"}
+else if(a.length>1){var tile=function(f,i,dup){return "<img src='"+f.d+"' alt='"+(dup?"":"Imagen del pie de página "+(i+1))+"' style='width:"+(160/f.r).toFixed(0)+"px'"+(dup?" aria-hidden='true' class='dup'":"")+">"},sw=a.reduce(function(s,f){return s+160/f.r+10},0),d=Math.max(14,Math.round(sw/55));
+h+="<div class='mq'><div class='mq-t' style='--d:"+d+"s'>"+a.map(function(f,i){return tile(f,i,0)}).join("")+a.map(function(f,i){return tile(f,i,1)}).join("")+"</div></div>"}
+h+="<div class='fch'>"+a.map(function(f,i){return "<span class='chip'><img src='"+f.d+"' alt=''><button data-fdel='"+i+"' aria-label='Quitar imagen "+(i+1)+"'>×</button></span>"}).join("")+"<button class='sec sm' id='fadd'>Agregar imagen(es)</button><input type='file' id='ff2' accept='image/*' multiple hidden></div></div>";return h}
+function readImg(f){return new Promise(function(ok){var r=new FileReader();r.onerror=function(){ok(null)};r.onload=function(){var im=new Image();im.onerror=function(){ok(null)};im.onload=function(){var w=Math.min(900,im.width),c=document.createElement("canvas");c.width=w;c.height=Math.round(im.height*w/im.width);c.getContext("2d").drawImage(im,0,0,c.width,c.height);ok({d:c.toDataURL("image/jpeg",.8),r:c.height/c.width})};im.src=r.result};r.readAsDataURL(f)})}
+function addFt(files){Promise.all(Array.prototype.slice.call(files).map(readImg)).then(function(rs){rs=rs.filter(Boolean);if(!rs.length){msg="No se pudo leer ninguna imagen.";render();return}FI=ftList().concat(rs);saveFI();var sy=window.scrollY;render();window.scrollTo(0,sy)})}
+function ftPanel(){return "<div class='q' style='margin-top:14px'><span class='lb'>Imágenes del pie de página</span><div class='mu'>Se muestran al final de cada página, una debajo de otra. Puede agregar varias.</div>"+ftList().map(function(f,i){return "<div class='th'><span><img src='"+f.d+"' alt='' style='width:64px;height:40px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px'>Imagen "+(i+1)+"</span><button class='del' data-fdel='"+i+"'>Quitar</button></div>"}).join("")+"<div class='acts' style='margin-top:10px'><button class='sec' id='fpick'>Agregar imagen(es)</button><input type='file' id='ff' accept='image/*' multiple hidden>"+(FI?"<button class='sec' id='frst'>Usar la predeterminada</button>":"")+"</div></div>"}
+function cfgKeys(c){return c.vs&&c.vs.length?c.vs:[c.v]}
+function selVal(c){var k=cfgKeys(c);return k.length>1?(k.length==chQs().length?"__all":"__sel"):k[0]}
+function chartAny(cfg,idx,lit){var ks=cfgKeys(cfg);
+if(ks.length<2){var g=chartGen(Object.assign({},cfg,{v:ks[0]}),idx,lit);return {svg:g.svg,parts:[g.svg],n:g.n}}
+var m=chartMulti(cfg,idx,lit);
+return {svg:m.svg+(m.omit?"<p class='mu'>Se omitieron "+m.omit+" pregunta(s) sin respuestas.</p>":""),parts:m.parts,n:m.n,ratio:m.ratio}}
+function chkList(c,i){var ks=cfgKeys(c);return "<details style='margin:10px 0'><summary><b class='chs'>Elegir preguntas ("+ks.length+")</b></summary><div class='acts' style='margin:8px 0'><button class='sec sm' data-chall='"+i+"'>Seleccionar todas</button><button class='sec sm' data-chnone='"+i+"'>Quitar selección</button></div>"+chQs().map(function(q){return "<label class='opt' style='margin-bottom:6px'><input type='checkbox' data-chq='"+i+"' value='"+q.k+"'"+(ks.indexOf(q.k)>-1?" checked":"")+">"+esc((q.n+". "+q.l).slice(0,80))+"</label>"}).join("")+"</details>"}
+function syncChq(i,card){var c=CH[i],vs=[];card.querySelectorAll("[data-chq]").forEach(function(b){if(b.checked)vs.push(b.value)});c.vs=vs;if(vs.length==1)c.v=vs[0];saveCH();refreshAll();var s=card.querySelector("select[data-f='v']");if(s)s.value=selVal(c);var h=card.querySelector(".chs");if(h)h.textContent="Elegir preguntas ("+cfgKeys(c).length+")";var tr=document.getElementById("tr"+i);if(tr)tr.style.display=""}
+document.addEventListener("change",function(e){var t=e.target;if(t.dataset.chq===undefined)return;syncChq(+t.dataset.chq,t.closest(".cgb"))});
+function pngAll(){var sv=allChart(true),m=sv.match(/viewBox='0 0 640 (\d+)'/),h=m?+m[1]:400,tw=1280,th=Math.round(tw*h/640),im=new Image(),u=URL.createObjectURL(new Blob([sv],{type:"image/svg+xml"}));
+im.onload=function(){URL.revokeObjectURL(u);var cv=document.createElement("canvas");cv.width=tw;cv.height=th;var x=cv.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,tw,th);x.drawImage(im,0,0,tw,th);cv.toBlob(function(b){if(b)save2("grafica_seguimiento.png",b,"image/png");else{msg="No se pudo crear la imagen.";render()}},"image/png")};
+im.onerror=function(){msg="No se pudo crear la imagen.";render()};im.src=u}
+function pngOf(i){var g=chartAny(CH[i],i,true),ps=g.parts,cols=1,tw=1280,th=tw*(g.ratio||.625),rows=1;
+Promise.all(ps.map(function(s){return new Promise(function(ok){var im=new Image(),u=URL.createObjectURL(new Blob([s],{type:"image/svg+xml"}));im.onload=function(){URL.revokeObjectURL(u);ok(im)};im.onerror=function(){ok(null)};im.src=u})})).then(function(ims){var cv=document.createElement("canvas");cv.width=cols*tw;cv.height=rows*th;var x=cv.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,cv.width,cv.height);ims.forEach(function(im,k){if(im)x.drawImage(im,(k%cols)*tw,Math.floor(k/cols)*th,tw,th)});cv.toBlob(function(b){if(b)save2("grafica_"+(i+1)+".png",b,"image/png");else{msg="No se pudo crear la imagen.";render()}},"image/png")})}
+document.addEventListener("input",function(e){var t=e.target,i=t.dataset.ch;if(i===undefined)return;i=+i;var f=t.dataset.f,c=CH[i];
+if(f=="v"){if(t.value=="__all")c.vs=chQs().map(function(q){return q.k});else if(t.value=="__sel"){if(!c.vs||c.vs.length<2)c.vs=cfgKeys(c)}else{c.v=t.value;c.vs=[t.value]}c.title="";saveCH();render();return}
+c[f]=f=="pal"?+t.value:t.value;saveCH();refreshAll()});
+function ld(){try{list=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){list=[]}}
+function sv(){try{localStorage.setItem(KEY,JSON.stringify(list))}catch(e){msg="No se pudo guardar en este dispositivo."}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function show(q){return !q.f||a[q.f[0]]===q.f[1]}
+function field(q){
+var v=a[q.k],h="<div class='q'><span class='lb'><b class='no'>"+q.n+".</b> "+esc(q.l)+(q.r?" *":"")+"</span>"+(q.h?"<div class='mu'>"+esc(q.h)+"</div>":"");
+if(q.y=="text"||q.y=="number"||q.y=="date")h+="<input type='"+q.y+"' data-k='"+q.k+"' "+(q.y=="number"?"inputmode='numeric' min='0' ":"")+"value='"+esc(v)+"' aria-label='"+esc(q.l)+"'>";
+else if(q.y=="area")h+="<textarea data-k='"+q.k+"' aria-label='"+esc(q.l)+"'>"+esc(v)+"</textarea>";
+else if(q.y=="radio"){h+="<div class='opts'>";q.o.forEach(function(o){h+="<label class='opt'><input type='radio' name='"+q.k+"' data-k='"+q.k+"' value='"+esc(o)+"'"+(v===o?" checked":"")+">"+esc(o)+"</label>"});h+="</div>"}
+else if(q.y=="multi"){h+="<div class='opts'>";q.o.forEach(function(o){h+="<label class='opt'><input type='checkbox' data-m='"+q.k+"' value='"+esc(o)+"'"+((v||[]).indexOf(o)>-1?" checked":"")+">"+esc(o)+"</label>"});h+="</div>"}
+else if(q.y=="counts"){q.o.forEach(function(o,i){h+="<div class='cnt'><label for='c"+i+"'>"+esc(o)+"</label><input id='c"+i+"' type='number' inputmode='numeric' min='0' data-k='"+q.k+"__"+i+"' value='"+esc(a[q.k+"__"+i])+"'></div>"})}
+return h+"</div>"}
+function render(){
+var m=document.getElementById("app"),h="";
+if(view=="cover"){m.innerHTML=(banner?"<div class='bn' style='height:"+BC.h+"px'><img src='"+banner+"' alt='Banner' style='"+isty()+"'></div>":"<div class='strip'></div>")+"<div class='cvr'><h1>"+esc(T.title||DT)+"</h1><p>"+esc(T.desc||DD)+"</p><button id='start'>Comenzar</button><button class='sec' id='cvb'>Volver</button></div>";return}
+if(view=="report"){m.innerHTML=hero("Informe de metodología generado con las encuestas")+"<div class='acts'><button id='rbk' class='sec'>Volver</button><button id='rdl'>Descargar</button><button id='rcp' class='sec'>Copiar texto</button></div>"+(msg?"<p class='msg'>"+esc(msg)+"</p>":"")+"<div class='card rp'>"+reporte()+"</div>";return}
+if(view=="home"){
+h+=hero("Encuesta a hogares afectados por el sismo de 2025. Meta y Yopal.");
+h+="<div class='acts'><button id='new'>Nueva encuesta</button><button class='sec' id='tdsg'>Personalizar diseño</button><button class='sec' id='bpick'>"+(banner?"Cambiar banner":"Agregar banner")+"</button><input type='file' id='bf' accept='image/*' hidden>"+(banner?"<button class='sec' id='badj'>Ajustar banner</button><button class='sec' id='bcrop'>Recortar banner</button><button class='sec' id='brm'>Quitar banner</button>":"")+(list.length?"<button class='sec' id='exp'>Exportar CSV</button><button class='sec' id='rep'>Generar metodología</button>":"")+"</div>";
+if(msg)h+="<p class='msg' role='alert'>"+esc(msg)+"</p>";if(adj&&banner)h+=panel();if(dsg)h+=dpanel2();
+h+=chartsCard();h+="<div class='card'><h2>Encuestas guardadas: "+list.length+"</h2>";
+list.slice().reverse().forEach(function(r,i){var ix=list.length-1-i;h+="<div class='row'><div><strong>"+esc(r.nombre||"Sin nombre")+"</strong><div class='mu'>"+esc(r.doc||"")+" · "+esc(r.mun||"")+" · "+esc(r.fecha||"")+"</div></div><span class='ra'><button class='sec sm' data-pdf='"+ix+"'>PDF</button><button class='sec sm' data-mail='"+ix+"'>Correo</button><button class='del' data-del='"+ix+"'>Borrar</button></span></div>"});
+h+="</div>"+ft();m.innerHTML=h;return}
+if(UN())step=0;var s=S[step],pc=UN()?100:Math.round((step+1)/S.length*100);
+h+=hero("Encuesta a hogares afectados por el sismo de 2025. Sus respuestas orientan la acción de las alcaldías de Meta y Yopal. Las preguntas con * son obligatorias.")+"<div class='prog'><div class='bar' role='progressbar' aria-valuenow='"+pc+"' aria-valuemin='0' aria-valuemax='100'><i style='width:"+pc+"%'></i></div><span>"+(UN()?"Una sola página":"Página "+(step+1)+"/"+S.length)+"</span></div><div class='card'><h2 class='st'>"+s.t+"</h2>";
+if(UN()){S.forEach(function(sx,i){if(i)h+="</div><div class='card'><h2 class='st'>"+sx.t+"</h2>";sx.q.forEach(function(q){if(show(q))h+=field(q)})})}else s.q.forEach(function(q){if(show(q))h+=field(q)});
+h+="</div>"+(msg?"<p class='msg' role='alert'>"+esc(msg)+"</p>":"");
+h+=ft();h+="<div class='nav'><div><button class='sec' id='prev'>"+(step?"Anterior":"Cancelar")+"</button><button id='next'>"+(!UN()&&step<S.length-1?"Siguiente":"Enviar")+"</button></div></div>";
+m.innerHTML=h;window.scrollTo(0,0)}
+function missing(){for(var i=0;i<S.length;i++)for(var j=0;j<S[i].q.length;j++){var q=S[i].q[j];if(q.r&&show(q)&&!String(a[q.k]||"").trim())return{s:i,l:q.l}}return null}
+function csv(){
+var cols=[];S.forEach(function(s){s.q.forEach(function(q){if(q.y=="counts")q.o.forEach(function(o,i){cols.push([q.k+"__"+i,q.l+": "+o])});else cols.push([q.k,q.l])})});
+var e=function(v){v=Array.isArray(v)?v.join(" | "):(v==null?"":String(v));return '"'+v.replace(/"/g,'""')+'"'};
+var out=[cols.map(function(c){return e(c[1])}).join(",")];
+list.forEach(function(r){out.push(cols.map(function(c){return e(r[c[0]])}).join(","))});
+return "\ufeff"+out.join("\r\n")}
+document.addEventListener("input",function(ev){var t=ev.target;if(t.dataset.k){a[t.dataset.k]=t.value}});
+document.addEventListener("change",function(ev){var t=ev.target;if(t.id=="bf"){setBanner(t.files[0]);return}if(t.id=="tf"){setTImg(t.files[0]);return}if(t.id=="bgf"){setTB(t.files[0]);return}if(t.id=="ff"||t.id=="ff2"){addFt(t.files);return}
+if(t.dataset.m){var k=t.dataset.m,l=a[k]||[];a[k]=t.checked?l.concat(t.value):l.filter(function(x){return x!==t.value})}
+else if(t.type=="radio"){a[t.dataset.k]=t.value;S.forEach(function(sx){sx.q.forEach(function(q){if(q.f&&q.f[0]==t.dataset.k&&q.f[1]!==t.value){delete a[q.k]}})});var y=window.scrollY;render();window.scrollTo(0,y)}});
+document.addEventListener("click",function(ev){var t=ev.target.closest("button");if(!t)return;
+if(t.id=="new"){a={fecha:new Date().toISOString().slice(0,10)};step=0;view=T.cover?"cover":"form";msg="";render()}
+else if(t.id=="prev"){msg="";if(step)step--;else view="home";render()}
+else if(t.id=="next"){msg="";if(!UN()&&step<S.length-1){step++;render();return}
+var mi=missing();if(mi){step=UN()?0:mi.s;msg="Falta un dato obligatorio: "+mi.l;render();return}
+a.guardado=new Date().toISOString();list.push(a);sv();a={};view="home";if(!msg)msg="Encuesta guardada. La gráfica de abajo ya incluye esta respuesta.";render();window.scrollTo(0,0)}
+else if(t.dataset.del){if(confirm("¿Borrar esta encuesta? No se puede deshacer.")){list.splice(+t.dataset.del,1);sv();render()}}
+else if(t.dataset.fdel!==undefined){var fa=ftList().slice();fa.splice(+t.dataset.fdel,1);FI=fa;saveFI();var sy=window.scrollY;render();window.scrollTo(0,sy)}
+else if(t.id=="fadd"){document.getElementById("ff2").click()}
+else if(t.id=="fpick"){document.getElementById("ff").click()}
+else if(t.id=="frst"){FI=null;try{localStorage.removeItem("seg_sismo_ft")}catch(e){}render()}
+else if(t.dataset.chall!==undefined||t.dataset.chnone!==undefined){var ci=t.dataset.chall!==undefined?t.dataset.chall:t.dataset.chnone,on=t.dataset.chall!==undefined,cd=t.closest(".cgb");cd.querySelectorAll("[data-chq]").forEach(function(x){x.checked=on});syncChq(+ci,cd)}
+else if(t.id=="chpngall"){pngAll()}
+else if(t.dataset.chpng!==undefined){pngOf(+t.dataset.chpng)}
+else if(t.dataset.chdel!==undefined){CH.splice(+t.dataset.chdel,1);saveCH();render()}
+else if(t.id=="chadd"){CH.push({v:"estado",t:"bar",pal:1,val:"pct",title:""});saveCH();render()}
+else if(t.dataset.pdf){pdfOf(list[+t.dataset.pdf])}
+else if(t.dataset.mail){mailDlg(list[+t.dataset.mail])}
+else if(t.id=="tdsg"){dsg=1;dtab="c";render()}
+else if(t.id=="tsave"){dsg=0;render()}
+else if(t.id=="tabc"){dtab="c";render()}
+else if(t.id=="tabt"){dtab="t";render()}
+else if(t.id=="bgpick"){document.getElementById("bgf").click()}
+else if(t.id=="bgrm"){TB="";try{localStorage.removeItem(TK+"_bg")}catch(e){}applyT();render()}
+else if(t.id=="tclr"){T={};TI="";TB="";try{localStorage.removeItem(TK);localStorage.removeItem(TK+"_img");localStorage.removeItem(TK+"_bg")}catch(e){}applyT();render()}
+else if(t.id=="tmk"){var nm=(document.getElementById("tn").value||"").trim()||"Mi tema "+(THS.length+1),cc={};["bg","sf","opt","ac","tx","hero"].forEach(function(k){if(T[k])cc[k]=T[k]});THS.push({n:nm,c:cc});saveThs();dtab="t";render()}
+else if(t.dataset.dev){T.dev=t.dataset.dev;applyT();saveT();render()}
+else if(t.dataset.ap){var ap=t.dataset.ap;applyTheme((ap[0]=="p"?PRE:THS)[+ap.slice(1)].c)}
+else if(t.dataset.td){THS.splice(+t.dataset.td,1);saveThs();render()}
+else if(t.id=="start"){view="form";render()}
+else if(t.id=="cvb"){view="home";render()}
+else if(t.id=="tdone"){dsg=0;render()}
+else if(t.id=="tpick"){document.getElementById("tf").click()}
+else if(t.id=="trm"){TI="";try{localStorage.removeItem(TK+"_img")}catch(e){}applyT();render()}
+else if(t.id=="tre"){T={};TI="";try{localStorage.removeItem(TK);localStorage.removeItem(TK+"_img")}catch(e){}applyT();render()}
+else if(t.id=="rep"){view="report";msg="";render();window.scrollTo(0,0)}
+else if(t.id=="rbk"){view="home";msg="";render()}
+else if(t.id=="rdl"){save2("metodologia_seccion7.html","<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'><title>Metodología</title><style>body{font-family:Arial,sans-serif;max-width:800px;margin:24px auto;line-height:1.5}table{border-collapse:collapse;margin:8px 0}td,th{border:1px solid #888;padding:4px 8px;text-align:left}th{background:#eee}</style></head><body>"+reporte(true)+"</body></html>","text/html")}
+else if(t.id=="rcp"){var tx=document.querySelector(".rp").innerText;(navigator.clipboard?navigator.clipboard.writeText(tx):Promise.reject()).then(function(){msg="Texto copiado.";render()},function(){msg="No se pudo copiar. Use Descargar.";render()})}
+else if(t.id=="bcrop"){openCrop()}
+else if(t.id=="badj"){adj=1;render()}
+else if(t.id=="bdone"){adj=0;render()}
+else if(t.id=="bpick"){document.getElementById("bf").click()}
+else if(t.id=="brm"){banner="";bannerO="";adj=0;try{localStorage.removeItem(BK);localStorage.removeItem(BK+"_o")}catch(e){}render()}
+else if(t.id=="exp"){(window.claude&&claude.use?claude.use("downloads"):Promise.resolve(null)).then(function(d){
+if(!d){dl();return}
+return d.save({filename:"seguimiento_sismo_"+new Date().toISOString().slice(0,10)+".csv",data:csv()}).catch(function(e){if(e&&e.code!="declined"){msg="No se pudo exportar.";render()}})})}
+});
+document.addEventListener("input",function(e){var t=e.target,k=t.dataset.b;if(!k)return;BC[k]=k=="f"?(t.checked?1:0):+t.value;var b=document.querySelector(".bn");if(b){b.style.height=BC.h+"px";b.firstChild.style.cssText=isty()}var v=document.getElementById("bhv");if(v)v.textContent=BC.h+" px";bsave()});
+document.addEventListener("pointerdown",function(e){var b=e.target.closest(".bn.adj");if(!b)return;var i=b.firstChild;drag={x:e.clientX,y:e.clientY,bx:BC.x,by:BC.y,w:b.clientWidth,h:b.clientHeight,nw:i.naturalWidth||1,nh:i.naturalHeight||1};try{b.setPointerCapture(e.pointerId)}catch(x){}});
+document.addEventListener("pointermove",function(e){if(!drag)return;var b=document.querySelector(".bn"),sc=BC.f?Math.min(drag.w/drag.nw,drag.h/drag.nh):Math.max(drag.w/drag.nw,drag.h/drag.nh),z=BC.z/100,ox=drag.nw*sc*z-drag.w,oy=drag.nh*sc*z-drag.h;if(ox>1)BC.x=cl(drag.bx-(e.clientX-drag.x)/ox*100);if(oy>1)BC.y=cl(drag.by-(e.clientY-drag.y)/oy*100);b.firstChild.style.cssText=isty()});
+document.addEventListener("pointerup",function(){if(drag){drag=null;bsave()}});
+document.addEventListener("input",function(e){var t=e.target,k=t.dataset.t;if(!k)return;T[k]=k=="veil"?+t.value:t.value;applyT();saveT()});
+document.addEventListener("input",function(e){var t=e.target,k=t.dataset.tb;if(!k)return;T[k]=t.checked;applyT();saveT();render()});
+applyT();ld();render();
+</script>
+</body>
+</html>
